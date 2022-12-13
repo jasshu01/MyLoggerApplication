@@ -3,6 +3,7 @@ package com.example.myloggerapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,34 +31,58 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
 
-                String[] command = new String[]{"logcat", "-d", "radio", "threadtime"};
-                Process process = null;
-                try {
-                    process = Runtime.getRuntime().exec("logcat -d radio");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-                String str = "";
-                String line = "";
-
-                while (true) {
-                    try {
-                        if (!((line = br.readLine()) != null)) break;
-                    } catch (IOException e) {
-                        e.printStackTrace();
+//                String[] command = new String[]{"logcat", "radio", "threadtime"};
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        capture();
                     }
-
-                    tv.setText(line + "\n\n" + tv.getText());
-
-                }
-
+                }).start();
 
             }
         });
 
 
     }
+
+
+    void capture() {
+
+
+        Process process = null;
+        try {
+            process = Runtime.getRuntime().exec("logcat radio");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+        String str = "";
+        String line = "";
+        int i = 0;
+        while (true) {
+            try {
+                if (!((line = br.readLine()) != null)) break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+//            Log.d("mylogs", " " + i++);
+
+            String finalLine = line;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    tv.setText(finalLine + "\n\n" + tv.getText());
+
+                }
+            });
+
+        }
+
+
+    }
+
 }
