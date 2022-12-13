@@ -84,7 +84,7 @@ public class ADBLogs extends AppCompatActivity {
 
         Process process = null;
         try {
-            process = Runtime.getRuntime().exec("logcat");
+            process = Runtime.getRuntime().exec("logcat all");
         } catch (IOException e) {
             e.printStackTrace();
         }

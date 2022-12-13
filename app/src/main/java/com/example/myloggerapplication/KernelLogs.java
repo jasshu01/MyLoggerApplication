@@ -84,7 +84,8 @@ public class KernelLogs extends AppCompatActivity {
 
         Process process = null;
         try {
-            process = Runtime.getRuntime().exec("logcat system");
+            process = Runtime.getRuntime().exec("logcat kernel");
+//            process = Runtime.getRuntime().exec("logcat system -f adb logcat -b system -f /storage/emulated/0/Downloads/myFile.txt");
         } catch (IOException e) {
             e.printStackTrace();
         }
