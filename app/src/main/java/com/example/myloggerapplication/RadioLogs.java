@@ -1,98 +1,71 @@
 package com.example.myloggerapplication;
 
-import static java.lang.Thread.sleep;
-
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
-import java.io.CharArrayWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class MainActivity extends AppCompatActivity {
+public class RadioLogs extends AppCompatActivity {
 
     TextView tv;
     Button start;
     Boolean flag;
 
-    Button RadioLogs, ADBLogs, KernelLogs;
 
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_radio_logs);
 
-        RadioLogs = findViewById(R.id.radioLogs);
-        ADBLogs = findViewById(R.id.adbLogs);
-        KernelLogs = findViewById(R.id.kernelLogs);
+        tv = findViewById(R.id.textview_logs);
+        start = findViewById(R.id.button_start);
+        flag = false;
+
+        File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File file = new File(folder, "RadioLOGS.txt");
 
 
-        RadioLogs.setOnClickListener(new View.OnClickListener() {
+        if (file.exists()) {
+            file.delete();
+        }
+
+        start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, RadioLogs.class));
-            }
-        });
-        ADBLogs.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, ADBLogs.class));
-            }
-        });
 
-//        tv = findViewById(R.id.textview_logs);
-//        start = findViewById(R.id.button_start);
-//        flag = false;
-//
-//        File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-//        File file = new File(folder, "RadioLOGS.txt");
-//
-//
-//        if (file.exists()) {
-//            file.delete();
-//        }
-//
-//        start.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//                if (!flag) {
-//                    flag = true;
-//                    start.setText("Stop");
-//                    tv.setText("capturing ");
-//
-//                    Thread myThread = new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            capture();
-//                        }
-//                    });
-//                    myThread.start();
-//
-//                } else {
-//                    flag = false;
-//                    start.setText("Start");
-//                    writeTextData(file, (String) tv.getText());
-//                    tv.setText("File Saved");
-//                }
-//
-//
-//            }
-//        });
+                if (!flag) {
+                    flag = true;
+                    start.setText("Stop");
+                    tv.setText("capturing ");
+
+                    Thread myThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            capture();
+                        }
+                    });
+                    myThread.start();
+
+                } else {
+                    flag = false;
+                    start.setText("Start");
+                    writeTextData(file, (String) tv.getText());
+                    tv.setText("File Saved @ "+ file.getAbsolutePath());
+                }
+
+
+            }
+        });
 
 
     }
