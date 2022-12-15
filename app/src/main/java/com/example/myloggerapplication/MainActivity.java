@@ -41,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         KernelLogs = findViewById(R.id.kernelLogs);
 
 
+
+
         RadioLogs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

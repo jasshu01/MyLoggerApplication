@@ -1,10 +1,18 @@
 package com.example.myloggerapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,7 +28,11 @@ public class RadioLogs extends AppCompatActivity {
     TextView tv;
     Button start;
     Boolean flag;
+    //    Handler mHandler = new Handler(Looper.getMainLooper());
+    Handler mHandler = new Handler(Looper.getMainLooper());
+    private MyLogsModel myLogsModel;
 
+    final String[] str = {""};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +42,14 @@ public class RadioLogs extends AppCompatActivity {
         tv = findViewById(R.id.textview_logs);
         start = findViewById(R.id.button_start);
         flag = false;
+        myLogsModel = new ViewModelProvider(this).get(MyLogsModel.class);
+
+        myLogsModel.myLogs.observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                tv.setText(s);
+            }
+        });
 
         File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File file = new File(folder, "RadioLOGS.txt");
@@ -39,28 +59,36 @@ public class RadioLogs extends AppCompatActivity {
             file.delete();
         }
 
+
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                str[0] = "";
                 if (!flag) {
                     flag = true;
                     start.setText("Stop");
                     tv.setText("capturing ");
 
-                    Thread myThread = new Thread(new Runnable() {
+                    AsyncTask.execute((new Runnable() {
                         @Override
                         public void run() {
-                            capture();
+                            Thread myThread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    capture();
+                                }
+                            });
+                            myThread.start();
                         }
-                    });
-                    myThread.start();
+                    }));
+
 
                 } else {
+                    Thread.interrupted();
                     flag = false;
                     start.setText("Start");
                     writeTextData(file, (String) tv.getText());
-                    tv.setText("File Saved @ "+ file.getAbsolutePath());
+                    tv.setText("File Saved @ " + file.getAbsolutePath());
                 }
 
 
@@ -91,16 +119,19 @@ public class RadioLogs extends AppCompatActivity {
         BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
 //        adb shell pm grant com.example.myloggerapplication android.permission.READ_LOGS
 
-        String str = "";
         String line = "";
 
         int i = 0;
         while (true && flag) {
+
             try {
                 if (!((line = br.readLine()) != null)) break;
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+//            Log.d("mylogs", "current thread " + Thread.currentThread().getName());
+
 
 //            Log.d("mylogs", " " + i++);
 
@@ -109,20 +140,25 @@ public class RadioLogs extends AppCompatActivity {
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
+            str[0] = line + "\n\n" + str[0];
 
+
+//
             String finalLine = line;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    tv.setText(finalLine + "\n\n" + tv.getText());
+
+                    if (flag) {
+//                        tv.setText(finalLine + "\n\n" + tv.getText());
+//                        tv.setText(str[0]);
+                        myLogsModel.myLogs.setValue(str[0]);
+
+                    }
                 }
             });
 
 
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            process.destroyForcibly();
         }
 
 
@@ -145,6 +181,11 @@ public class RadioLogs extends AppCompatActivity {
                 }
             }
         }
+    }
+
+
+    public final void MyrunOnUiThread(Runnable action) {
+        mHandler.post(action);
     }
 
 
