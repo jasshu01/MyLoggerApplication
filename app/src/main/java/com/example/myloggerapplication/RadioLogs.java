@@ -32,7 +32,7 @@ public class RadioLogs extends AppCompatActivity {
     //    Handler mHandler = new Handler(Looper.getMainLooper());
     Handler mHandler = new Handler();
     private MyLogsModel myLogsModel;
-
+    boolean mainActivityisOpen = false;
     final String[] str = {""};
 
     @Override
@@ -53,6 +53,9 @@ public class RadioLogs extends AppCompatActivity {
         });
 
         File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+
+
         File file = new File(folder, "RadioLOGS.txt");
 
 
@@ -150,18 +153,21 @@ public class RadioLogs extends AppCompatActivity {
 
 //
             String finalLine = line;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
 
-                    if (flag) {
+
+            if (mainActivityisOpen)
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (flag) {
 //                        tv.setText(finalLine + "\n\n" + tv.getText());
 //                        tv.setText(str[0]);
-                        myLogsModel.myLogs.setValue(str[0]);
+                            myLogsModel.myLogs.setValue(str[0]);
 
+                        }
                     }
-                }
-            });
+                });
 
 
         }
@@ -193,5 +199,25 @@ public class RadioLogs extends AppCompatActivity {
         mHandler.post(action);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        mainActivityisOpen = true;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+
+        mainActivityisOpen = true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mainActivityisOpen = false;
+    }
 }
