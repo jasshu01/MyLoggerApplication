@@ -8,12 +8,15 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
 public class ViewAllLogs extends AppCompatActivity {
+    ArrayList<File> mylogs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,16 +26,67 @@ public class ViewAllLogs extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         Button deleteSelectedLogs = findViewById(R.id.deleteSelectedLogs);
 
+        TextView viewAllLogs = findViewById(R.id.viewAllLogs);
+        TextView viewRadioLogs = findViewById(R.id.viewRadioLogs);
+        TextView viewADBLogs = findViewById(R.id.viewADBLogs);
+        TextView viewKernelLogs = findViewById(R.id.viewKernelLogs);
+
+
         File RadioLogsFolder = MainActivity.RadioLogsFolder;
         File ADBLogsFolder = MainActivity.ADBLogsFolder;
         File KernelLogsFolder = MainActivity.KernelLogsFolder;
 
-        ArrayList<File> mylogs = new ArrayList<>();
-        mylogs.addAll(fetchLogs(RadioLogsFolder));
+        mylogs = new ArrayList<>();
+
 
         LogsAdapter logsAdapter = new LogsAdapter(mylogs);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+
+        mylogs.addAll(fetchLogs(RadioLogsFolder));
+        mylogs.addAll(fetchLogs(ADBLogsFolder));
+        mylogs.addAll(fetchLogs(KernelLogsFolder));
+
         recyclerView.setAdapter(logsAdapter);
+
+
+        viewAllLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mylogs.clear();
+                mylogs.addAll(fetchLogs(RadioLogsFolder));
+                mylogs.addAll(fetchLogs(ADBLogsFolder));
+                mylogs.addAll(fetchLogs(KernelLogsFolder));
+
+//                logsAdapter.notifyDataSetChanged();
+                recyclerView.setAdapter(logsAdapter);
+            }
+        });
+
+        viewRadioLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mylogs.clear();
+                mylogs.addAll(fetchLogs(RadioLogsFolder));
+                recyclerView.setAdapter(logsAdapter);
+            }
+        });
+        viewADBLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mylogs.clear();
+                Toast.makeText(ViewAllLogs.this, "Showing ADB Logs only", Toast.LENGTH_SHORT).show();
+                mylogs.addAll(fetchLogs(ADBLogsFolder));
+                recyclerView.setAdapter(logsAdapter);
+            }
+        });
+        viewKernelLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mylogs.clear();
+                mylogs.addAll(fetchLogs(KernelLogsFolder));
+                recyclerView.setAdapter(logsAdapter);
+            }
+        });
 
 
         deleteSelectedLogs.setOnClickListener(new View.OnClickListener() {
@@ -45,24 +99,20 @@ public class ViewAllLogs extends AppCompatActivity {
                 }
                 recyclerView.setAdapter(logsAdapter);
                 logsAdapter.notifyDataSetChanged();
-
-
             }
         });
-
-
     }
 
-    private ArrayList<File> fetchLogs(File radioLogsFolder) {
-        ArrayList<File> radioLogs = new ArrayList<>();
-        File[] myFiles = radioLogsFolder.listFiles();
+    private ArrayList<File> fetchLogs(File currentLogsFolder) {
+        ArrayList<File> currentLogs = new ArrayList<>();
+        File[] myFiles = currentLogsFolder.listFiles();
 
         for (File myfile : myFiles) {
-            if (myfile.getName().startsWith("Radio")) {
-                radioLogs.add(myfile);
-            }
+            currentLogs.add(myfile);
         }
 
-        return radioLogs;
+        return currentLogs;
     }
+
+
 }

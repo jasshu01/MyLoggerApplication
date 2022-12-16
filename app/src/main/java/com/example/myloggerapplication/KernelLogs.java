@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class KernelLogs extends AppCompatActivity {
 
@@ -33,8 +35,6 @@ public class KernelLogs extends AppCompatActivity {
         start = findViewById(R.id.button_start);
         flag = false;
 
-        File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File file = new File(folder, "Kernel_LOGS.txt");
 
 
         start.setOnClickListener(new View.OnClickListener() {
@@ -57,9 +57,20 @@ public class KernelLogs extends AppCompatActivity {
                 } else {
                     flag = false;
                     start.setText("Start");
-                    if (file.exists()) {
-                        file.delete();
+
+                    LocalDateTime now = null;
+                    DateTimeFormatter dtf = null;
+                    String FileName = "";
+
+
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+                        now = LocalDateTime.now();
                     }
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        FileName = "KernelLogs_" + (dtf.format(now) + ".txt");
+                    }
+                    File file = new File(MainActivity.KernelLogsFolder, FileName);
                     writeTextData(file, (String) tv.getText());
                     tv.setText("File Saved @ " + file.getAbsolutePath());
                 }

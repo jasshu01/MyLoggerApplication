@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         ViewAllLogs = findViewById(R.id.viewAllLogs);
 
 
+
         File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
         ApplicationFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication");
