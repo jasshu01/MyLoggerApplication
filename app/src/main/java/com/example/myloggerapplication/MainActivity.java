@@ -41,7 +41,11 @@ public class MainActivity extends AppCompatActivity {
         KernelLogs = findViewById(R.id.kernelLogs);
 
 
+        File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
+        File newFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication");
+
+        newFolder.mkdir();
 
         RadioLogs.setOnClickListener(new View.OnClickListener() {
             @Override

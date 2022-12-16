@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class RadioLogs extends AppCompatActivity {
 
@@ -40,6 +42,13 @@ public class RadioLogs extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_radio_logs);
 
+        File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File newFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/RadioLogs");
+
+        newFolder.mkdir();
+
+        str[0] = "";
+
         tv = findViewById(R.id.textview_logs);
         start = findViewById(R.id.button_start);
         flag = false;
@@ -51,17 +60,6 @@ public class RadioLogs extends AppCompatActivity {
                 tv.setText(s);
             }
         });
-
-        File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-
-
-
-        File file = new File(folder, "RadioLOGS.txt");
-
-
-        if (file.exists()) {
-            file.delete();
-        }
 
 
         start.setOnClickListener(new View.OnClickListener() {
@@ -95,6 +93,28 @@ public class RadioLogs extends AppCompatActivity {
                     Thread.interrupted();
                     flag = false;
                     start.setText("Start");
+
+                    LocalDateTime now = null;
+                    DateTimeFormatter dtf = null;
+                    String FileName = "";
+
+
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+                        now = LocalDateTime.now();
+                    }
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        FileName = "RadioLogs_" + (dtf.format(now) + ".txt");
+                    }
+
+
+                    File file = new File(newFolder, FileName);
+
+
+//                    if (file.exists()) {
+//                        file.delete();
+//                    }
+
                     writeTextData(file, (String) tv.getText());
                     tv.setText("File Saved @ " + file.getAbsolutePath());
                 }
