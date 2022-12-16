@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,7 +30,7 @@ public class RadioLogs extends AppCompatActivity {
     Button start;
     Boolean flag;
     //    Handler mHandler = new Handler(Looper.getMainLooper());
-    Handler mHandler = new Handler(Looper.getMainLooper());
+    Handler mHandler = new Handler();
     private MyLogsModel myLogsModel;
 
     final String[] str = {""};
@@ -69,7 +70,8 @@ public class RadioLogs extends AppCompatActivity {
                     start.setText("Stop");
                     tv.setText("capturing ");
 
-                    AsyncTask.execute((new Runnable() {
+//                    AsyncTask.execute((new Runnable() {
+                    MyrunOnUiThread((new Runnable() {
                         @Override
                         public void run() {
                             Thread myThread = new Thread(new Runnable() {
@@ -84,6 +86,9 @@ public class RadioLogs extends AppCompatActivity {
 
 
                 } else {
+
+                    Toast.makeText(RadioLogs.this, "Stopping", Toast.LENGTH_SHORT).show();
+                    str[0] = "";
                     Thread.interrupted();
                     flag = false;
                     start.setText("Start");
