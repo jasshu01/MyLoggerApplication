@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     Boolean flag;
 
     Button RadioLogs, ADBLogs, KernelLogs;
+    static File RadioLogsFolder, ADBLogsFolder, KernelLogsFolder;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -43,9 +44,16 @@ public class MainActivity extends AppCompatActivity {
 
         File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-        File newFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication");
+        File ApplicationFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication");
+        RadioLogsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/RadioLogs");
+        ADBLogsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/ADBLogs");
+        KernelLogsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/KernelLogs");
 
-        newFolder.mkdir();
+        ApplicationFolder.mkdir();
+        RadioLogsFolder.mkdir();
+        ADBLogsFolder.mkdir();
+        KernelLogsFolder.mkdir();
+
 
         RadioLogs.setOnClickListener(new View.OnClickListener() {
             @Override

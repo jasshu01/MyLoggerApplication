@@ -42,10 +42,6 @@ public class RadioLogs extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_radio_logs);
 
-        File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File newFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/RadioLogs");
-
-        newFolder.mkdir();
 
         str[0] = "";
 
@@ -108,13 +104,7 @@ public class RadioLogs extends AppCompatActivity {
                     }
 
 
-                    File file = new File(newFolder, FileName);
-
-
-//                    if (file.exists()) {
-//                        file.delete();
-//                    }
-
+                    File file = new File(MainActivity.RadioLogsFolder, FileName);
                     writeTextData(file, (String) tv.getText());
                     tv.setText("File Saved @ " + file.getAbsolutePath());
                 }
