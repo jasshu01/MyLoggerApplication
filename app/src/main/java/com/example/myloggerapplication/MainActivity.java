@@ -28,8 +28,8 @@ public class MainActivity extends AppCompatActivity {
     Button start;
     Boolean flag;
 
-    Button RadioLogs, ADBLogs, KernelLogs;
-    static File RadioLogsFolder, ADBLogsFolder, KernelLogsFolder;
+    Button RadioLogs, ADBLogs, KernelLogs, ViewAllLogs;
+    static File ApplicationFolder, RadioLogsFolder, ADBLogsFolder, KernelLogsFolder;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -40,11 +40,12 @@ public class MainActivity extends AppCompatActivity {
         RadioLogs = findViewById(R.id.radioLogs);
         ADBLogs = findViewById(R.id.adbLogs);
         KernelLogs = findViewById(R.id.kernelLogs);
+        ViewAllLogs = findViewById(R.id.viewAllLogs);
 
 
         File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-        File ApplicationFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication");
+        ApplicationFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication");
         RadioLogsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/RadioLogs");
         ADBLogsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/ADBLogs");
         KernelLogsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/KernelLogs");
@@ -71,6 +72,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(MainActivity.this, KernelLogs.class));
+            }
+        });
+        ViewAllLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, ViewAllLogs.class));
             }
         });
 
