@@ -6,6 +6,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,16 +27,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RadioLogs extends AppCompatActivity {
 
     TextView tv;
     Button start;
     Boolean flag;
-    //    Handler mHandler = new Handler(Looper.getMainLooper());
-    Handler mHandler = new Handler();
     private MyLogsModel myLogsModel;
-    boolean mainActivityisOpen = false;
+    boolean activityIsOpen = false;
     final String[] str = {""};
 
     @Override
@@ -67,46 +70,31 @@ public class RadioLogs extends AppCompatActivity {
                     start.setText("Stop");
                     tv.setText("capturing ");
 
-//                    AsyncTask.execute((new Runnable() {
-                    MyrunOnUiThread((new Runnable() {
+                    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+                    scheduledExecutorService.schedule(new Runnable() {
                         @Override
                         public void run() {
-                            Thread myThread = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    capture();
-                                }
-                            });
-                            myThread.start();
+                            capture();
                         }
-                    }));
+                    }, 1, TimeUnit.MILLISECONDS);
+
+//                    AsyncTask.execute((new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Thread myThread = new Thread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    capture();
+//                                }
+//                            });
+//                            myThread.start();
+//                        }
+//                    }));
 
 
                 } else {
+                    stop();
 
-                    Toast.makeText(RadioLogs.this, "Stopping", Toast.LENGTH_SHORT).show();
-                    str[0] = "";
-                    Thread.interrupted();
-                    flag = false;
-                    start.setText("Start");
-
-                    LocalDateTime now = null;
-                    DateTimeFormatter dtf = null;
-                    String FileName = "";
-
-
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                        dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
-                        now = LocalDateTime.now();
-                    }
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                        FileName = "RadioLogs_" + (dtf.format(now) + ".txt");
-                    }
-
-
-                    File file = new File(MainActivity.RadioLogsFolder, FileName);
-                    writeTextData(file, (String) tv.getText());
-                    tv.setText("File Saved @ " + file.getAbsolutePath());
                 }
 
 
@@ -126,6 +114,13 @@ public class RadioLogs extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+//        if(getApplicationContext().checkCallingOrSelfPermission(Manifest.permission.READ_LOGS)!= PackageManager.PERMISSION_GRANTED)
+//        {
+//            tv.setText("READ_LOGS permission is required!!");
+//            return;
+//        }
+
 
         Process process = null;
         try {
@@ -165,19 +160,19 @@ public class RadioLogs extends AppCompatActivity {
             String finalLine = line;
 
 
-            if (mainActivityisOpen)
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+            if (activityIsOpen)
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
 
-                        if (flag) {
+                    if (flag) {
 //                        tv.setText(finalLine + "\n\n" + tv.getText());
 //                        tv.setText(str[0]);
-                            myLogsModel.myLogs.setValue(str[0]);
+                        myLogsModel.myLogs.setValue(str[0]);
 
-                        }
                     }
-                });
+                }
+            });
 
 
         }
@@ -185,6 +180,32 @@ public class RadioLogs extends AppCompatActivity {
 
     }
 
+
+    void stop() {
+        Toast.makeText(RadioLogs.this, "Stopping", Toast.LENGTH_SHORT).show();
+        str[0] = "";
+        Thread.interrupted();
+        flag = false;
+        start.setText("Start");
+
+        LocalDateTime now = null;
+        DateTimeFormatter dtf = null;
+        String FileName = "";
+
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+            now = LocalDateTime.now();
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            FileName = "RadioLogs_" + (dtf.format(now) + ".txt");
+        }
+
+
+        File file = new File(MainActivity.RadioLogsFolder, FileName);
+        writeTextData(file, (String) tv.getText());
+        tv.setText("File Saved @ " + file.getAbsolutePath());
+    }
 
     private void writeTextData(File file, String data) {
         FileOutputStream fileOutputStream = null;
@@ -205,29 +226,22 @@ public class RadioLogs extends AppCompatActivity {
     }
 
 
-    public final void MyrunOnUiThread(Runnable action) {
-        mHandler.post(action);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
 
-        mainActivityisOpen = true;
+        activityIsOpen = true;
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-
-        mainActivityisOpen = true;
+        activityIsOpen = true;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        mainActivityisOpen = false;
+        activityIsOpen = false;
     }
 }

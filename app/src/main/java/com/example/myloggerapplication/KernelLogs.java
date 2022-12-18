@@ -3,9 +3,11 @@ package com.example.myloggerapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.format.Time;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -17,13 +19,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class KernelLogs extends AppCompatActivity {
 
     TextView tv;
     Button start;
     Boolean flag;
-
+    private MyLogsModel myLogsModel;
+    boolean mainActivityisOpen = false;
+    final String[] str = {""};
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -31,11 +38,13 @@ public class KernelLogs extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kernel_logs);
 
+        str[0] = "";
+
         tv = findViewById(R.id.textview_logs);
         start = findViewById(R.id.button_start);
         flag = false;
 
-
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
         start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,13 +55,13 @@ public class KernelLogs extends AppCompatActivity {
                     start.setText("Stop");
                     tv.setText("capturing ");
 
-                    Thread myThread = new Thread(new Runnable() {
+                    scheduledExecutorService.schedule(new Runnable() {
                         @Override
                         public void run() {
                             capture();
                         }
-                    });
-                    myThread.start();
+                    }, 1, TimeUnit.MILLISECONDS);
+
 
                 } else {
                     flag = false;
