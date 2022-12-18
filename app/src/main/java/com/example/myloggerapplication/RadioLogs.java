@@ -161,18 +161,18 @@ public class RadioLogs extends AppCompatActivity {
 
 
             if (activityIsOpen)
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                    if (flag) {
+                        if (flag) {
 //                        tv.setText(finalLine + "\n\n" + tv.getText());
 //                        tv.setText(str[0]);
-                        myLogsModel.myLogs.setValue(str[0]);
+                            myLogsModel.myLogs.setValue(str[0]);
 
+                        }
                     }
-                }
-            });
+                });
 
 
         }
