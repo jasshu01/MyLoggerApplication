@@ -1,11 +1,14 @@
 package com.example.myloggerapplication;
 
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,15 +26,32 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.ViewHolder> {
 
 
         CheckBox myItem;
+        ImageView openFile;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             myItem = itemView.findViewById(R.id.checkBox);
+            openFile = itemView.findViewById(R.id.openFile);
+
+            openFile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(itemView.getContext(), localDataSet.get(getAdapterPosition()).getName(), Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(itemView.getContext(), ViewLog.class);
+                    intent.putExtra("filePath", localDataSet.get(getAdapterPosition()).getAbsolutePath());
+                    itemView.getContext().startActivity(intent);
+
+                }
+            });
+
 
             myItem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
+                    Log.d("mylogs", String.valueOf(compoundButton.isChecked()));
 
                     if (b) {
                         checkedLogs.add(localDataSet.get(getAdapterPosition()));
@@ -43,6 +63,8 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.ViewHolder> {
                 }
             });
         }
+
+
     }
 
 
