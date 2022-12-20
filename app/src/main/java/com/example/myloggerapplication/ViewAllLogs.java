@@ -25,6 +25,8 @@ public class ViewAllLogs extends AppCompatActivity {
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         Button deleteSelectedLogs = findViewById(R.id.deleteSelectedLogs);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"})
+        Button shareSelectedLogs = findViewById(R.id.shareSelectedLogs);
 
         TextView viewAllLogs = findViewById(R.id.viewAllLogs);
         TextView viewRadioLogs = findViewById(R.id.viewRadioLogs);
