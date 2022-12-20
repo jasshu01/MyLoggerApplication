@@ -49,6 +49,8 @@ public class ViewAllLogs extends AppCompatActivity {
         mylogs.addAll(fetchLogs(KernelLogsFolder));
 
         recyclerView.setAdapter(logsAdapter);
+        
+        
 
 
         viewAllLogs.setOnClickListener(new View.OnClickListener() {
@@ -94,6 +96,12 @@ public class ViewAllLogs extends AppCompatActivity {
         deleteSelectedLogs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if(LogsAdapter.checkedLogs.size()==0)
+                {
+                    Toast.makeText(ViewAllLogs.this, "Please select atleast one file", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 for (File myFile :
                         LogsAdapter.checkedLogs) {
                     myFile.delete();
@@ -103,6 +111,19 @@ public class ViewAllLogs extends AppCompatActivity {
                 logsAdapter.notifyDataSetChanged();
             }
         });
+        
+        
+        
+        shareSelectedLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(LogsAdapter.checkedLogs.size()>0)
+                Toast.makeText(ViewAllLogs.this, "Sharing the selected Files", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(ViewAllLogs.this, "Please select atleast one file", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
     }
 
     private ArrayList<File> fetchLogs(File currentLogsFolder) {
