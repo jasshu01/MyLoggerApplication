@@ -6,12 +6,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
@@ -40,6 +44,7 @@ public class ViewAllLogs extends AppCompatActivity {
 
         mylogs = new ArrayList<>();
 
+        saveFileInSystem();
 
         LogsAdapter logsAdapter = new LogsAdapter(mylogs);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -49,8 +54,6 @@ public class ViewAllLogs extends AppCompatActivity {
         mylogs.addAll(fetchLogs(KernelLogsFolder));
 
         recyclerView.setAdapter(logsAdapter);
-        
-        
 
 
         viewAllLogs.setOnClickListener(new View.OnClickListener() {
@@ -97,8 +100,7 @@ public class ViewAllLogs extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if(LogsAdapter.checkedLogs.size()==0)
-                {
+                if (LogsAdapter.checkedLogs.size() == 0) {
                     Toast.makeText(ViewAllLogs.this, "Please select atleast one file", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -111,19 +113,22 @@ public class ViewAllLogs extends AppCompatActivity {
                 logsAdapter.notifyDataSetChanged();
             }
         });
-        
-        
-        
+
+
         shareSelectedLogs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(LogsAdapter.checkedLogs.size()>0)
-                Toast.makeText(ViewAllLogs.this, "Sharing the selected Files", Toast.LENGTH_SHORT).show();
-                else
+                if (LogsAdapter.checkedLogs.size() > 0) {
+                    Toast.makeText(ViewAllLogs.this, "Sharing the selected Files", Toast.LENGTH_SHORT).show();
+//                    Log.d("mylogss", LogsAdapter.checkedLogs.get(0).getAbsolutePath());
+
+                    saveFileInSystem();
+
+                } else
                     Toast.makeText(ViewAllLogs.this, "Please select atleast one file", Toast.LENGTH_SHORT).show();
             }
         });
-        
+
     }
 
     private ArrayList<File> fetchLogs(File currentLogsFolder) {
@@ -137,5 +142,51 @@ public class ViewAllLogs extends AppCompatActivity {
         return currentLogs;
     }
 
+    public void saveFileInSystem() {
+        try {
+            Runtime.getRuntime().exec("pm grant com.example.myloggerapplication android.permission.READ_LOGS");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
+
+        try {
+            Log.d("mylogss", "pulling");
+
+            Process process = null;
+//                        process = Runtime.getRuntime().exec(" pull /sdcard/Download/MyLoggerApplication/RadioLogs/" + LogsAdapter.checkedLogs.get(0).getName() );//+ " /Users/tnluser/AndroidStudioProjects");
+//
+//                        process = Runtime.getRuntime().exec(" pull " +" /Users/tnluser/AndroidStudioProjects/hello.txt"+ "/sdcard/Download/helllo.txt");
+//                        process = Runtime.getRuntime().exec("adb pull " + "/sdcard/Download/RadioLOGS.txt" + " /Users/tnluser/AndroidStudioProjects");
+
+//                        process=Runtime.getRuntime().exec("push /storage/emulated/0/Download/MyLoggerApplication/RadioLogs/RadioLogs_2022_12_18_09_08_50.txt  /Users/tnluser/AndroidStudioProjects/mylog1.txt");
+            process = Runtime.getRuntime().exec("adb pull /sdcard/Download/RadioLOGS.txt /Users/tnluser/AndroidStudioProjects/MyLoggerApplication\n");
+
+            Log.d("mylogss", "pulled");
+            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = "";
+            while (true) {
+
+                try {
+                    if (!((line = br.readLine()) != null)) break;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Log.d("mylogss", "pulled " + line);
+            }
+
+
+//                    adb pull /sdcard/Download/RadioLOGS.txt /Users/tnluser/AndroidStudioProjects/MyLoggerApplication
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogsAdapter.checkedLogs.clear();
+    }
 }
