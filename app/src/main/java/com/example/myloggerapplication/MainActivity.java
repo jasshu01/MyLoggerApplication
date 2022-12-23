@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.CharArrayWriter;
@@ -80,6 +81,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        bugReports.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                startActivity(new Intent(MainActivity.this, GenertateBugReports.class));
+
+
+
+            }
+        });
+
+
+
     }
 
     @Override
@@ -94,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.viewLogs) {
-            // do something here
             startActivity(new Intent(MainActivity.this, ViewAllLogs.class));
         }
         return super.onOptionsItemSelected(item);
