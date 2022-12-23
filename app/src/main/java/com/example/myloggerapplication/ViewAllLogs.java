@@ -1,5 +1,7 @@
 package com.example.myloggerapplication;
 
+import static android.os.Debug.isDebuggerConnected;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,18 +21,21 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
+import android.os.Debug;
+
 public class ViewAllLogs extends AppCompatActivity {
     ArrayList<File> mylogs;
+    Button shareSelectedLogs;
 
+    @SuppressLint({"MissingInflatedId", "LocalSuppress"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_all_logs);
-        @SuppressLint({"MissingInflatedId", "LocalSuppress"})
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         Button deleteSelectedLogs = findViewById(R.id.deleteSelectedLogs);
-        @SuppressLint({"MissingInflatedId", "LocalSuppress"})
-        Button shareSelectedLogs = findViewById(R.id.shareSelectedLogs);
+
+        shareSelectedLogs = findViewById(R.id.shareSelectedLogs);
 
         TextView viewAllLogs = findViewById(R.id.viewAllLogs);
         TextView viewRadioLogs = findViewById(R.id.viewRadioLogs);
@@ -143,11 +148,25 @@ public class ViewAllLogs extends AppCompatActivity {
     }
 
     public void saveFileInSystem() {
-        try {
-            Runtime.getRuntime().exec("pm grant com.example.myloggerapplication android.permission.READ_LOGS");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+
+        Log.d("debuggingInfo", "" + isDebuggerConnected());
+
+//
+//        try {
+//            Runtime.getRuntime().exec("pm grant com.example.myloggerapplication android.permission.READ_LOGS");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+
+//physical device
+//        adb pull /sdcard/Download/ch5.pdf /Users/tnluser/AndroidStudioProjects
+//        adb push /Users/tnluser/AndroidStudioProjects/hello.txt /sdcard/Download/HelloWorld.txt
+
+//emulator
+//        adb pull /sdcard/Download/MyLoggerApplication/RadioLogs/RadioLogs_2022_12_18_09_54_51.txt  /Users/tnluser/AndroidStudioProjects
+//         adb push /Users/tnluser/AndroidStudioProjects/hello.txt /sdcard/Download/HelloWorld.txt
 
 
         try {
@@ -160,7 +179,11 @@ public class ViewAllLogs extends AppCompatActivity {
 //                        process = Runtime.getRuntime().exec("adb pull " + "/sdcard/Download/RadioLOGS.txt" + " /Users/tnluser/AndroidStudioProjects");
 
 //                        process=Runtime.getRuntime().exec("push /storage/emulated/0/Download/MyLoggerApplication/RadioLogs/RadioLogs_2022_12_18_09_08_50.txt  /Users/tnluser/AndroidStudioProjects/mylog1.txt");
-            process = Runtime.getRuntime().exec("adb pull /sdcard/Download/RadioLOGS.txt /Users/tnluser/AndroidStudioProjects/MyLoggerApplication\n");
+//            process = Runtime.getRuntime().exec(" pull /sdcard/Download/RadioLOGS.txt /Users/tnluser/AndroidStudioProjects/MyLoggerApplication --ez enabled true");
+            process = Runtime.getRuntime().exec(" push /sdcard/Download/RadioLOGS.txt /Users/tnluser/AndroidStudioProjects/MyLoggerApplication ");
+//
+//
+//            process=Runtime.getRuntime().exec("push "+LogsAdapter.checkedLogs.get(0).getAbsolutePath());
 
             Log.d("mylogss", "pulled");
             BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
