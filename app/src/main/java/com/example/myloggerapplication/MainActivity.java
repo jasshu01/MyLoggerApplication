@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
     Button start;
     Boolean flag;
 
-    Button RadioLogs, ADBLogs, KernelLogs;
-    static File ApplicationFolder, RadioLogsFolder, ADBLogsFolder, KernelLogsFolder;
+    TextView RadioLogs, ADBLogs, KernelLogs, bugReports;
+    static File ApplicationFolder, RadioLogsFolder, ADBLogsFolder, KernelLogsFolder,BugReportsFolder;
 
 
     @SuppressLint("MissingInflatedId")
@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         RadioLogs = findViewById(R.id.radioLogs);
         ADBLogs = findViewById(R.id.adbLogs);
         KernelLogs = findViewById(R.id.kernelLogs);
+        bugReports = findViewById(R.id.bugReports);
 
 
         File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -51,11 +52,13 @@ public class MainActivity extends AppCompatActivity {
         RadioLogsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/RadioLogs");
         ADBLogsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/ADBLogs");
         KernelLogsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/KernelLogs");
+        BugReportsFolder = new File(folder.getAbsolutePath() + "/MyLoggerApplication/BugReports");
 
         ApplicationFolder.mkdir();
         RadioLogsFolder.mkdir();
         ADBLogsFolder.mkdir();
         KernelLogsFolder.mkdir();
+        BugReportsFolder.mkdir();
 
 
         RadioLogs.setOnClickListener(new View.OnClickListener() {
