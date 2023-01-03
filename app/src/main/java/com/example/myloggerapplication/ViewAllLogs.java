@@ -68,8 +68,6 @@ public class ViewAllLogs extends AppCompatActivity {
                 mylogs.addAll(fetchLogs(RadioLogsFolder));
                 mylogs.addAll(fetchLogs(ADBLogsFolder));
                 mylogs.addAll(fetchLogs(KernelLogsFolder));
-
-//                logsAdapter.notifyDataSetChanged();
                 recyclerView.setAdapter(logsAdapter);
             }
         });
@@ -126,14 +124,13 @@ public class ViewAllLogs extends AppCompatActivity {
                 if (LogsAdapter.checkedLogs.size() > 0) {
                     Toast.makeText(ViewAllLogs.this, "Sharing the selected Files", Toast.LENGTH_SHORT).show();
 //                    Log.d("mylogss", LogsAdapter.checkedLogs.get(0).getAbsolutePath());
-
-                    saveFileInSystem();
+//                    saveFileInSystem();
 
                 } else
                     Toast.makeText(ViewAllLogs.this, "Please select atleast one file", Toast.LENGTH_SHORT).show();
             }
         });
-
+        shareSelectedLogs.setVisibility(View.GONE);
     }
 
     private ArrayList<File> fetchLogs(File currentLogsFolder) {
@@ -150,7 +147,6 @@ public class ViewAllLogs extends AppCompatActivity {
     public void saveFileInSystem() {
 
 
-        Log.d("debuggingInfo", "" + isDebuggerConnected());
 
 //
 //        try {

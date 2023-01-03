@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         ADBLogs = findViewById(R.id.adbLogs);
         KernelLogs = findViewById(R.id.kernelLogs);
         bugReports = findViewById(R.id.bugReports);
-
+        bugReports.setVisibility(View.GONE);
 
         File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
@@ -111,27 +111,27 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.viewLogs) {
             startActivity(new Intent(MainActivity.this, ViewAllLogs.class));
         }
-        else if(id == R.id.viewANR)
-        {
-            try {
-//                adb root
-//                adb shell ls /data/anr
-//                adb pull /data/anr/<filename>
-//                Runtime.getRuntime().exec("su");
-                Process process=Runtime.getRuntime().exec("ls /data/anr");
-                BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-                Log.d("myANRs","click done");
-                String line="";
-                while((line=br.readLine())!=null)
-                {
-                    Log.d("myANRs",line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
+//        else if(id == R.id.viewANR)
+//        {
+//            try {
+////                adb root
+////                adb shell ls /data/anr
+////                adb pull /data/anr/<filename>
+////                Runtime.getRuntime().exec("su");
+//                Process process=Runtime.getRuntime().exec("ls /data/anr");
+//                BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//
+//                Log.d("myANRs","click done");
+//                String line="";
+//                while((line=br.readLine())!=null)
+//                {
+//                    Log.d("myANRs",line);
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
         return super.onOptionsItemSelected(item);
     }
 
