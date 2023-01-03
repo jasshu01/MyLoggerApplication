@@ -49,7 +49,7 @@ public class ViewAllLogs extends AppCompatActivity {
 
         mylogs = new ArrayList<>();
 
-        saveFileInSystem();
+//        saveFileInSystem();
 
         LogsAdapter logsAdapter = new LogsAdapter(mylogs);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -68,7 +68,8 @@ public class ViewAllLogs extends AppCompatActivity {
                 mylogs.addAll(fetchLogs(RadioLogsFolder));
                 mylogs.addAll(fetchLogs(ADBLogsFolder));
                 mylogs.addAll(fetchLogs(KernelLogsFolder));
-                recyclerView.setAdapter(logsAdapter);
+                recyclerView.setAdapter(logsAdapter);Toast.makeText(ViewAllLogs.this, "Showing All Logs ", Toast.LENGTH_SHORT).show();
+
             }
         });
 
@@ -78,6 +79,8 @@ public class ViewAllLogs extends AppCompatActivity {
                 mylogs.clear();
                 mylogs.addAll(fetchLogs(RadioLogsFolder));
                 recyclerView.setAdapter(logsAdapter);
+                Toast.makeText(ViewAllLogs.this, "Showing Radio Logs only", Toast.LENGTH_SHORT).show();
+
             }
         });
         viewADBLogs.setOnClickListener(new View.OnClickListener() {
@@ -95,6 +98,8 @@ public class ViewAllLogs extends AppCompatActivity {
                 mylogs.clear();
                 mylogs.addAll(fetchLogs(KernelLogsFolder));
                 recyclerView.setAdapter(logsAdapter);
+                Toast.makeText(ViewAllLogs.this, "Showing Kernel Logs only", Toast.LENGTH_SHORT).show();
+
             }
         });
 
