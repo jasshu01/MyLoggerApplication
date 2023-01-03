@@ -60,6 +60,7 @@ public class RadioLogs extends AppCompatActivity {
             }
         });
 
+        start.setText("Capture Radio Logs");
 
         start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,8 +68,8 @@ public class RadioLogs extends AppCompatActivity {
                 str[0] = "";
                 if (!flag) {
                     flag = true;
-                    start.setText("Stop");
-                    tv.setText("capturing ");
+                    start.setText("Stop Capturing");
+//                    tv.setText("capturing ");
 
                     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
                     scheduledExecutorService.schedule(new Runnable() {
@@ -127,18 +128,12 @@ public class RadioLogs extends AppCompatActivity {
             str[0] = line + "\n\n" + str[0];
 
 
-//
-            String finalLine = line;
-
-
             if (activityIsOpen)
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
 
                         if (flag) {
-//                        tv.setText(finalLine + "\n\n" + tv.getText());
-//                        tv.setText(str[0]);
                             myLogsModel.myLogs.setValue(str[0]);
 
                         }
@@ -157,7 +152,7 @@ public class RadioLogs extends AppCompatActivity {
         str[0] = "";
         Thread.interrupted();
         flag = false;
-        start.setText("Start");
+        start.setText("Start Capturing Radio Logs");
 
         LocalDateTime now = null;
         DateTimeFormatter dtf = null;

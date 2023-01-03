@@ -57,15 +57,15 @@ public class KernelLogs extends AppCompatActivity {
             }
         });
 
-
+start.setText("Capture Kernel Logs");
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 str[0] = "";
                 if (!flag) {
                     flag = true;
-                    start.setText("Stop");
-                    tv.setText("capturing ");
+                    start.setText("Stop Capturing");
+//                    tv.setText("capturing ");
 
                     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
                     scheduledExecutorService.schedule(new Runnable() {
@@ -149,6 +149,8 @@ public class KernelLogs extends AppCompatActivity {
 
 
     void stop() {
+
+        start.setText("Capture Kernel Logs");
         Toast.makeText(KernelLogs.this, "Stopping", Toast.LENGTH_SHORT).show();
         str[0] = "";
         Thread.interrupted();

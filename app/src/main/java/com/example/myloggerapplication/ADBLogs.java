@@ -56,14 +56,15 @@ public class ADBLogs extends AppCompatActivity {
         });
 
 
+        start.setText("Capture ADB Logs");
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 str[0] = "";
                 if (!flag) {
                     flag = true;
-                    start.setText("Stop");
-                    tv.setText("capturing ");
+                    start.setText("Stop Capturing");
+//                    tv.setText("capturing ");
 
                     ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
                     scheduledExecutorService.schedule(new Runnable() {
@@ -148,6 +149,8 @@ public class ADBLogs extends AppCompatActivity {
 
 
     void stop() {
+
+        start.setText("Capture ADB Logs");
         Toast.makeText(ADBLogs.this, "Stopping", Toast.LENGTH_SHORT).show();
         str[0] = "";
         Thread.interrupted();
