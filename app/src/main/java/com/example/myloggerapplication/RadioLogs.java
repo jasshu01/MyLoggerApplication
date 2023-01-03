@@ -78,8 +78,6 @@ public class RadioLogs extends AppCompatActivity {
                         }
                     }, 1, TimeUnit.MILLISECONDS);
 
-
-
                 } else {
                     stop();
 

@@ -1,6 +1,8 @@
 package com.example.myloggerapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
@@ -11,6 +13,7 @@ import android.text.format.Time;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,29 +35,39 @@ public class KernelLogs extends AppCompatActivity {
     boolean mainActivityisOpen = false;
     final String[] str = {""};
 
+    boolean activityIsOpen = false;
+    
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kernel_logs);
-
         str[0] = "";
 
         tv = findViewById(R.id.textview_logs);
         start = findViewById(R.id.button_start);
         flag = false;
+        myLogsModel = new ViewModelProvider(this).get(MyLogsModel.class);
 
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        myLogsModel.myLogs.observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                tv.setText(s);
+            }
+        });
+
 
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                str[0] = "";
                 if (!flag) {
                     flag = true;
                     start.setText("Stop");
                     tv.setText("capturing ");
 
+                    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
                     scheduledExecutorService.schedule(new Runnable() {
                         @Override
                         public void run() {
@@ -62,32 +75,14 @@ public class KernelLogs extends AppCompatActivity {
                         }
                     }, 1, TimeUnit.MILLISECONDS);
 
-
                 } else {
-                    flag = false;
-                    start.setText("Start");
+                    stop();
 
-                    LocalDateTime now = null;
-                    DateTimeFormatter dtf = null;
-                    String FileName = "";
-
-
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                        dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
-                        now = LocalDateTime.now();
-                    }
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                        FileName = "KernelLogs_" + (dtf.format(now) + ".txt");
-                    }
-                    File file = new File(MainActivity.KernelLogsFolder, FileName);
-                    writeTextData(file, (String) tv.getText());
-                    tv.setText("File Saved @ " + file.getAbsolutePath());
                 }
 
 
             }
         });
-
 
     }
 
@@ -113,43 +108,71 @@ public class KernelLogs extends AppCompatActivity {
         BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
 //        adb shell pm grant com.example.myloggerapplication android.permission.READ_LOGS
 
-        String str = "";
         String line = "";
 
         int i = 0;
         while (true && flag) {
+
             try {
                 if (!((line = br.readLine()) != null)) break;
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-//            Log.d("mylogs", " " + i++);
 
-//            try {
-//                sleep(100);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            str[0] = line + "\n\n" + str[0];
 
+
+//
             String finalLine = line;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    tv.setText(finalLine + "\n\n" + tv.getText());
-                }
-            });
 
 
-        }
+            if (activityIsOpen)
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            process.destroyForcibly();
+                        if (flag) {
+//                        tv.setText(finalLine + "\n\n" + tv.getText());
+//                        tv.setText(str[0]);
+                            myLogsModel.myLogs.setValue(str[0]);
+
+                        }
+                    }
+                });
+
+
         }
 
 
     }
 
+
+    void stop() {
+        Toast.makeText(KernelLogs.this, "Stopping", Toast.LENGTH_SHORT).show();
+        str[0] = "";
+        Thread.interrupted();
+        flag = false;
+        start.setText("Start");
+
+        LocalDateTime now = null;
+        DateTimeFormatter dtf = null;
+        String FileName = "";
+
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+            now = LocalDateTime.now();
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            FileName = "KernelLogs_" + (dtf.format(now) + ".txt");
+        }
+
+
+        File file = new File(MainActivity.KernelLogsFolder, FileName);
+        writeTextData(file, (String) tv.getText());
+        tv.setText("File Saved @ " + file.getAbsolutePath());
+    }
 
     private void writeTextData(File file, String data) {
         FileOutputStream fileOutputStream = null;
@@ -167,5 +190,25 @@ public class KernelLogs extends AppCompatActivity {
                 }
             }
         }
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        activityIsOpen = true;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        activityIsOpen = true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        activityIsOpen = false;
     }
 }
