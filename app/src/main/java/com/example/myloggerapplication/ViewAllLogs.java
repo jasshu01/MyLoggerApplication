@@ -68,7 +68,9 @@ public class ViewAllLogs extends AppCompatActivity {
                 mylogs.addAll(fetchLogs(RadioLogsFolder));
                 mylogs.addAll(fetchLogs(ADBLogsFolder));
                 mylogs.addAll(fetchLogs(KernelLogsFolder));
-                recyclerView.setAdapter(logsAdapter);Toast.makeText(ViewAllLogs.this, "Showing All Logs ", Toast.LENGTH_SHORT).show();
+                recyclerView.setAdapter(logsAdapter);
+                //                LogsAdapter.checkedLogs.clear();
+                Toast.makeText(ViewAllLogs.this, "Showing All Logs ", Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -79,6 +81,7 @@ public class ViewAllLogs extends AppCompatActivity {
                 mylogs.clear();
                 mylogs.addAll(fetchLogs(RadioLogsFolder));
                 recyclerView.setAdapter(logsAdapter);
+//                LogsAdapter.checkedLogs.clear();
                 Toast.makeText(ViewAllLogs.this, "Showing Radio Logs only", Toast.LENGTH_SHORT).show();
 
             }
@@ -87,6 +90,7 @@ public class ViewAllLogs extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mylogs.clear();
+//                LogsAdapter.checkedLogs.clear();
                 Toast.makeText(ViewAllLogs.this, "Showing ADB Logs only", Toast.LENGTH_SHORT).show();
                 mylogs.addAll(fetchLogs(ADBLogsFolder));
                 recyclerView.setAdapter(logsAdapter);
@@ -98,6 +102,7 @@ public class ViewAllLogs extends AppCompatActivity {
                 mylogs.clear();
                 mylogs.addAll(fetchLogs(KernelLogsFolder));
                 recyclerView.setAdapter(logsAdapter);
+//                LogsAdapter.checkedLogs.clear();
                 Toast.makeText(ViewAllLogs.this, "Showing Kernel Logs only", Toast.LENGTH_SHORT).show();
 
             }
@@ -150,7 +155,6 @@ public class ViewAllLogs extends AppCompatActivity {
     }
 
     public void saveFileInSystem() {
-
 
 
 //

@@ -88,6 +88,10 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.ViewHolder> {
 
         holder.myItem.setText(localDataSet.get(position).getName());
 
+        if(checkedLogs.contains(localDataSet.get(position)))
+        {
+            holder.myItem.setChecked(true);
+        }
 
     }
 
