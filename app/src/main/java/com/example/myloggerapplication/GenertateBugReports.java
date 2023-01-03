@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -36,8 +37,14 @@ public class GenertateBugReports extends AppCompatActivity {
 
 
                 try {
-                    Process process1 = Runtime.getRuntime().exec("root ");
-                    Process process = Runtime.getRuntime().exec("bugreportz -p ");
+//                    Process process1 = Runtime.getRuntime().exec("root ");
+//                    Process process = Runtime.getRuntime().exec("shell su");
+                    Process process = Runtime.getRuntime().exec("bugreportz -p");
+                    DataOutputStream os = new DataOutputStream(process.getOutputStream());
+//                    os.writeBytes("bugreportz");
+//                    Process process = Runtime.getRuntime().exec("bugreportz");
+//                    Process process = Runtime.getRuntime().exec("dumpstate -o bugreportz ");
+//                    Process process = Runtime.getRuntime().exec("ls /bugreports/ ");
                     BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
                     String line="";

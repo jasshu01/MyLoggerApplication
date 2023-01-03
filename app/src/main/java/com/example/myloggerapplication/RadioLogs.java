@@ -78,18 +78,6 @@ public class RadioLogs extends AppCompatActivity {
                         }
                     }, 1, TimeUnit.MILLISECONDS);
 
-//                    AsyncTask.execute((new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Thread myThread = new Thread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    capture();
-//                                }
-//                            });
-//                            myThread.start();
-//                        }
-//                    }));
 
 
                 } else {
@@ -115,12 +103,6 @@ public class RadioLogs extends AppCompatActivity {
             e.printStackTrace();
         }
 
-//        if(getApplicationContext().checkCallingOrSelfPermission(Manifest.permission.READ_LOGS)!= PackageManager.PERMISSION_GRANTED)
-//        {
-//            tv.setText("READ_LOGS permission is required!!");
-//            return;
-//        }
-
 
         Process process = null;
         try {
@@ -143,16 +125,7 @@ public class RadioLogs extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-//            Log.d("mylogs", "current thread " + Thread.currentThread().getName());
 
-
-//            Log.d("mylogs", " " + i++);
-
-//            try {
-//                sleep(100);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
             str[0] = line + "\n\n" + str[0];
 
 

@@ -5,4 +5,7 @@
     <item
         android:id="@+id/viewLogs"
         android:title="View All Logs" />
+    <item
+        android:id="@+id/viewANR"
+        android:title="View ANR traces" />
 </menu>
