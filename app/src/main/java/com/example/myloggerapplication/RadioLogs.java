@@ -97,7 +97,9 @@ public class RadioLogs extends AppCompatActivity {
 
         try {
             Runtime.getRuntime().exec("logcat -c");
+
             Runtime.getRuntime().exec("pm grant com.example.myloggerapplication android.permission.READ_LOGS");
+            Log.d("permissionaccess","Done");
         } catch (IOException e) {
             e.printStackTrace();
         }

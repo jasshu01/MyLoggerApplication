@@ -155,7 +155,7 @@ start.setText("Capture Kernel Logs");
         str[0] = "";
         Thread.interrupted();
         flag = false;
-        start.setText("Start");
+
 
         LocalDateTime now = null;
         DateTimeFormatter dtf = null;
