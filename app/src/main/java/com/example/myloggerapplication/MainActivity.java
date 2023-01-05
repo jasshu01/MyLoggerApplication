@@ -3,9 +3,13 @@ package com.example.myloggerapplication;
 import static java.lang.Thread.sleep;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,6 +31,8 @@ import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int EXTERNAL_STORAGE_PERMISSION_CODE =10001 ;
+    private static final int WRITE_EXTERNAL_STORAGE_PERMISSION_CODE =10002 ;
     TextView tv;
     Button start;
     Boolean flag;
@@ -60,6 +66,30 @@ public class MainActivity extends AppCompatActivity {
         ADBLogsFolder.mkdir();
         KernelLogsFolder.mkdir();
         BugReportsFolder.mkdir();
+
+
+//        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+//                EXTERNAL_STORAGE_PERMISSION_CODE);
+//
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    EXTERNAL_STORAGE_PERMISSION_CODE);
+        }
+//        else {
+//            Toast.makeText(MainActivity.this, "Permission already granted", Toast.LENGTH_SHORT).show();
+//        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    WRITE_EXTERNAL_STORAGE_PERMISSION_CODE);
+        }
+//        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+//            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+//                    WRITE_EXTERNAL_STORAGE_PERMISSION_CODE);
+//        }
+//
+//        else {
+//            Toast.makeText(MainActivity.this, "Permission already granted", Toast.LENGTH_SHORT).show();
+//        }
 
 
         RadioLogs.setOnClickListener(new View.OnClickListener() {
