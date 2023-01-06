@@ -20,6 +20,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,11 +43,16 @@ public class RadioLogs extends AppCompatActivity {
     boolean activityIsOpen = false;
     final String[] str = {""};
 
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+    DatabaseReference myRef = database.getReference("RadioLogMessages");
+    String id = myRef.push().getKey();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_radio_logs);
-
+myRef.child(id).setValue("Hello Radio Logs here");
 
         str[0] = "";
 
@@ -99,7 +107,7 @@ public class RadioLogs extends AppCompatActivity {
             Runtime.getRuntime().exec("logcat -c");
 
             Runtime.getRuntime().exec("pm grant com.example.myloggerapplication android.permission.READ_LOGS");
-            Log.d("permissionaccess","Done");
+            Log.d("permissionaccess", "Done");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -129,7 +137,7 @@ public class RadioLogs extends AppCompatActivity {
 
             str[0] = line + "\n\n" + str[0];
 
-
+            myRef.child(id).setValue(tv.getText());
             if (activityIsOpen)
                 runOnUiThread(new Runnable() {
                     @Override

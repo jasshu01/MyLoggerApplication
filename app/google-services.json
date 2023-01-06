@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1080724879641",
+    "project_id": "myloggerapplication",
+    "storage_bucket": "myloggerapplication.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1080724879641:android:2709ab5907fea0b320ed88",
+        "android_client_info": {
+          "package_name": "com.example.myloggerapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1080724879641-9ttajpot2jhdkp83v2t3n0bm8l5udl25.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyV1_QG5pGXlfwXjQNcXxnBV2bpKi5YCc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1080724879641-9ttajpot2jhdkp83v2t3n0bm8l5udl25.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
