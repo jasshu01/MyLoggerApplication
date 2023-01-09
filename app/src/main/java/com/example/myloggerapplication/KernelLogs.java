@@ -10,10 +10,19 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
+
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,9 +43,10 @@ public class KernelLogs extends AppCompatActivity {
     private MyLogsModel myLogsModel;
     boolean mainActivityisOpen = false;
     final String[] str = {""};
+    String uploadData="";
 
     boolean activityIsOpen = false;
-    
+
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -57,7 +67,7 @@ public class KernelLogs extends AppCompatActivity {
             }
         });
 
-start.setText("Capture Kernel Logs");
+        start.setText("Capture Kernel Logs");
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -76,7 +86,11 @@ start.setText("Capture Kernel Logs");
                     }, 1, TimeUnit.MILLISECONDS);
 
                 } else {
-                    stop();
+                    try {
+                        stop();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
                 }
 
@@ -148,7 +162,8 @@ start.setText("Capture Kernel Logs");
     }
 
 
-    void stop() {
+    void stop() throws IOException {
+        uploadData=tv.getText().toString();
 
         start.setText("Capture Kernel Logs");
         Toast.makeText(KernelLogs.this, "Stopping", Toast.LENGTH_SHORT).show();
@@ -174,6 +189,21 @@ start.setText("Capture Kernel Logs");
         File file = new File(MainActivity.KernelLogsFolder, FileName);
         writeTextData(file, (String) tv.getText());
         tv.setText("File Saved @ " + file.getAbsolutePath());
+
+
+//        curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary \
+//        -H "Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9" \
+//        -H "Content-Type: text/plain" `# change to match the file's MIME type` \
+//                -d "Example Data"             `# to upload a file: --data-binary @file.jpg`
+
+//        curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary \
+//        -H "Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9" \
+//        -H "Content-Type: text/plain" \
+//                -data-binary @output.txt
+//
+//
+        new PerformTask().execute();
+
     }
 
     private void writeTextData(File file, String data) {
@@ -213,4 +243,49 @@ start.setText("Capture Kernel Logs");
         super.onPause();
         activityIsOpen = false;
     }
+
+
+    class PerformTask extends AsyncTask<Void, Void, Void> {
+
+        private Exception exception;
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            String data = tv.getText().toString();
+            String uploadcommand = "curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary -H " + "\"Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9\" -H \"Content-Type: text/plain\" -d \"" + data + "\"";
+//
+            Log.d("uploading", uploadcommand);
+//        Runtime.getRuntime().exec(uploadcommand);
+
+
+            // avoid creating several instances, should be singleon
+            OkHttpClient client = new OkHttpClient();
+            RequestBody body = RequestBody.create(MediaType.parse("text/plain"), uploadData);
+            Request request = new Request.Builder()
+                    .header("Authorization ", "Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9")
+                    .url("https://api.upload.io/v2/accounts/FW25b1c/uploads/binary")
+                    .post(body)
+                    .build();
+
+            Response response = null;
+            try {
+                response = client.newCall(request).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                Log.d("uploading", response.body().string());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        protected void onPostExecute(Void feed) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
+        }
+    }
+
 }
