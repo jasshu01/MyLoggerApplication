@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int EXTERNAL_STORAGE_PERMISSION_CODE =10001 ;
     private static final int WRITE_EXTERNAL_STORAGE_PERMISSION_CODE =10002 ;
+    private static final int INTERNET_PERMISSION_CODE =10003 ;
     TextView tv;
     Button start;
     Boolean flag;
@@ -81,6 +82,9 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     WRITE_EXTERNAL_STORAGE_PERMISSION_CODE);
+        }if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET},
+                    INTERNET_PERMISSION_CODE);
         }
 //        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
 //            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
