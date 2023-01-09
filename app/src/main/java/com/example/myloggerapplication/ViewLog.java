@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -22,13 +23,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class ViewLog extends AppCompatActivity {
     TextView textView;
-
+    SearchView searchView;
 
     @SuppressLint({"MissingInflatedId", "LocalSuppress"})
     @Override
@@ -36,6 +38,7 @@ public class ViewLog extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_log);
         textView = findViewById(R.id.textView);
+        searchView = findViewById(R.id.searchView);
 
         Intent intent = getIntent();
         String filePath = intent.getStringExtra("filePath");
@@ -53,7 +56,7 @@ public class ViewLog extends AppCompatActivity {
 //        int byteLength = 1;
 
 
-        byte[] buffer = new byte[1024 * 1024 ];
+        byte[] buffer = new byte[1024 * 1024];
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         while (true) {
             try {
@@ -67,6 +70,36 @@ public class ViewLog extends AppCompatActivity {
         String output = out.toString();
         textView.setText(output);
 
+        String[] mylines = output.split("\n\n");
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                onQueryTextChange(s);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                if (s.length() == 0)
+                {
+                    textView.setText(output);
+                    return true;
+                }
+
+
+                String newOutput = "";
+                s = s.toLowerCase();
+                for (String str :
+                        mylines) {
+                    if (str.toLowerCase().contains(s)) {
+                        newOutput += str + "\n\n";
+                    }
+                }
+                textView.setText(newOutput);
+                return true;
+            }
+        });
 
     }
 
