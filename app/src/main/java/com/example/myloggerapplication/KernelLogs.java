@@ -16,11 +16,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import com.here.oksse.OkSse;
+import com.here.oksse.ServerSentEvent;
+//import com.squareup.okhttp.MediaType;
+//import com.squareup.okhttp.OkHttpClient;
+//
+//import com.squareup.okhttp.RequestBody;
+//import com.squareup.okhttp.Response;
 
 import org.w3c.dom.Text;
 
@@ -34,6 +36,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.Request;
 
 public class KernelLogs extends AppCompatActivity {
 
@@ -97,6 +101,52 @@ public class KernelLogs extends AppCompatActivity {
 
             }
         });
+
+
+        String path="http://192.168.1.1:5000/events";
+
+        Request request = new Request.Builder().url(path).build();
+
+        OkSse okSse = new OkSse();
+        ServerSentEvent sse = okSse.newServerSentEvent(request, new ServerSentEvent.Listener() {
+            @Override
+            public void onOpen(ServerSentEvent sse, okhttp3.Response response) {
+                Log.d("oksee","connection open");
+            }
+
+            @Override
+            public void onMessage(ServerSentEvent sse, String id, String event, String message) {
+                Log.d("oksee","Event : "+event+"\nMessage: "+message);
+            }
+
+            @Override
+            public void onComment(ServerSentEvent sse, String comment) {
+
+            }
+
+            @Override
+            public boolean onRetryTime(ServerSentEvent sse, long milliseconds) {
+                return false;
+            }
+
+            @Override
+            public boolean onRetryError(ServerSentEvent sse, Throwable throwable, okhttp3.Response response) {
+                return false;
+            }
+
+            @Override
+            public void onClosed(ServerSentEvent sse) {
+
+            }
+
+            @Override
+            public okhttp3.Request onPreRetry(ServerSentEvent sse, okhttp3.Request originalRequest) {
+                return null;
+            }
+        });
+
+
+
 
     }
 
@@ -260,25 +310,25 @@ public class KernelLogs extends AppCompatActivity {
 
 
             // avoid creating several instances, should be singleon
-            OkHttpClient client = new OkHttpClient();
-            RequestBody body = RequestBody.create(MediaType.parse("text/plain"), uploadData);
-            Request request = new Request.Builder()
-                    .header("Authorization ", "Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9")
-                    .url("https://api.upload.io/v2/accounts/FW25b1c/uploads/binary")
-                    .post(body)
-                    .build();
-
-            Response response = null;
-            try {
-                response = client.newCall(request).execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                Log.d("uploading", response.body().string());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            OkHttpClient client = new OkHttpClient();
+//            RequestBody body = RequestBody.create(MediaType.parse("text/plain"), uploadData);
+//            Request request = new Request.Builder()
+//                    .header("Authorization ", "Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9")
+//                    .url("https://api.upload.io/v2/accounts/FW25b1c/uploads/binary")
+//                    .post(body)
+//                    .build();
+//
+//            Response response = null;
+//            try {
+//                response = client.newCall(request).execute();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            try {
+//                Log.d("uploading", response.body().string());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
             return null;
         }
 
