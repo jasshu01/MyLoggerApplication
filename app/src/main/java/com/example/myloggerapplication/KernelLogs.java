@@ -77,7 +77,7 @@ import io.socket.emitter.Emitter;
 
 public class KernelLogs extends AppCompatActivity {
     private Socket socket;
-//    private SocketIO socketIO;
+    //    private SocketIO socketIO;
 //    {
 //        try {
 ////            socket = IO.socket("http://192.168.1.11:3000");
@@ -88,7 +88,7 @@ public class KernelLogs extends AppCompatActivity {
 //            e.printStackTrace();
 //        }
 //    }
-
+    boolean userConnected = false;
 
     private PrintWriter output;
     TextView tv;
@@ -145,7 +145,9 @@ public class KernelLogs extends AppCompatActivity {
                     socket.on("userjoinedthechat", new Emitter.Listener() {
                         @Override
                         public void call(Object... args) {
-                            Log.d("socket", "message received : " + args[0]);
+                            if (userConnected == false)
+                                Log.d("socket", "message received : " + args[0]);
+                            userConnected = true;
                         }
                     });
                     socket.on("start_Logging", new Emitter.Listener() {
@@ -158,9 +160,8 @@ public class KernelLogs extends AppCompatActivity {
                             scheduledExecutorService.schedule(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (!flag)
-                                    {
-                                        flag=true;
+                                    if (!flag) {
+                                        flag = true;
                                         captureOnServerCommand();
                                     }
 
@@ -557,7 +558,9 @@ public class KernelLogs extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        socket.close();
+        if (userConnected)
+            socket.close();
+        userConnected = false;
 //        Log.d("socket", "closed , connected " + socket.connected());
     }
 }
