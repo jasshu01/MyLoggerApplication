@@ -32,6 +32,11 @@ import android.widget.Toast;
 //import com.squareup.okhttp.Response;
 
 import com.github.nkzawa.engineio.client.transports.WebSocket;
+import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,6 +71,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 //import io.socket.client.Socket;
 
 
@@ -91,6 +97,7 @@ public class KernelLogs extends AppCompatActivity {
     private MyLogsModel myLogsModel;
     boolean mainActivityisOpen = false;
     final String[] str = {""};
+    final String[] strForServerCommand = {""};
     String uploadData = "";
 
     boolean activityIsOpen = false;
@@ -100,6 +107,7 @@ public class KernelLogs extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        new PerformTaskOnServerCommand().execute();
         setContentView(R.layout.activity_kernel_logs);
         str[0] = "";
 
@@ -119,263 +127,161 @@ public class KernelLogs extends AppCompatActivity {
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                str[0] = "";
-                if (!flag) {
-                    flag = true;
-                    start.setText("Stop Capturing");
-//                    tv.setText("capturing ");
 
-                    ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-                    scheduledExecutorService.schedule(new Runnable() {
+                capture_0();
+
+            }
+        });
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+//                    socket = new Socket("192.168.1.11", 3000);
+                    socket = IO.socket("http://192.168.1.11:3000");
+                    socket.connect().emit("join", "Jasshu");
+
+
+                    socket.on("userjoinedthechat", new Emitter.Listener() {
                         @Override
-                        public void run() {
-                            capture();
+                        public void call(Object... args) {
+                            Log.d("socket", "message received : " + args[0]);
                         }
-                    }, 1, TimeUnit.MILLISECONDS);
+                    });
+                    socket.on("start_Logging", new Emitter.Listener() {
+                        @Override
+                        public void call(Object... args) {
+                            Log.d("socket", "message received : " + args[0]);
+                            flag = false;
 
-                } else {
-                    try {
-                        stop();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                            ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+                            scheduledExecutorService.schedule(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!flag)
+                                    {
+                                        flag=true;
+                                        captureOnServerCommand();
+                                    }
 
+                                }
+                            }, 1, TimeUnit.MILLISECONDS);
+
+                        }
+
+
+                    });
+                    socket.on("stop_Logging", new Emitter.Listener() {
+                        @Override
+                        public void call(Object... args) {
+                            Log.d("socket", "message received : " + args[0]);
+                            try {
+                                stopOnServerCommand();
+                                flag = false;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+
+
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
                 }
 
 
             }
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-//                    socket = new Socket("192.168.1.11", 3000);
-                    socket=IO.socket("http://192.168.1.11:3000");
-                    socket.connect().emit("join","Jasshu");
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                }
-
-
-//                try {
-//                    socket.connect(socket.getRemoteSocketAddress());
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                Log.d("sockets", "Connected " + socket.connected());
-//                Log.d("sockets", "Connected " + socket.toString());
-//
-//                try {
-//                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-//                    dataOutputStream.writeBytes("join: hello1");
-//                    dataOutputStream.flush();
-//                    Process process = Runtime.getRuntime().exec("ping 192.168.1.11:3000");
-//                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//                    String line = "";
-//                    StringBuffer output = new StringBuffer();
-//                    while ((line = reader.readLine()) != null)
-//                        output.append(line);
-//                    reader.close();
-//
-//                    // Waits for the command to finish.
-//                    process.waitFor();
-//
-//                    Log.d("socket_Ping", output.toString());
-//
-//                    Log.d("socket", String.valueOf(socket.getRemoteSocketAddress()));
-//                } catch (Exception e) {
-//                    Log.d("socket", e.toString());
-//                    e.printStackTrace();
-//                }
-
-//                Log.d("sockets", "Connected " + socket.isConnected());
-////
-
-            }
-        }).start();
-
-
-//        String path="http://192.168.1.1:5000/events";
-//
-//        Request request = new Request.Builder().url(path).build();
-//
-//        OkSse okSse = new OkSse();
-//        ServerSentEvent sse = okSse.newServerSentEvent(request, new ServerSentEvent.Listener() {
-//            @Override
-//            public void onOpen(ServerSentEvent sse, okhttp3.Response response) {
-//                Log.d("oksee","connection open");
-//            }
-//
-//            @Override
-//            public void onMessage(ServerSentEvent sse, String id, String event, String message) {
-//                Log.d("oksee","Event : "+event+"\nMessage: "+message);
-//            }
-//
-//            @Override
-//            public void onComment(ServerSentEvent sse, String comment) {
-//
-//            }
-//
-//            @Override
-//            public boolean onRetryTime(ServerSentEvent sse, long milliseconds) {
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onRetryError(ServerSentEvent sse, Throwable throwable, okhttp3.Response response) {
-//                return false;
-//            }
-//
-//            @Override
-//            public void onClosed(ServerSentEvent sse) {
-//
-//            }
-//
-//            @Override
-//            public okhttp3.Request onPreRetry(ServerSentEvent sse, okhttp3.Request originalRequest) {
-//                return null;
-//            }
-//        });
-
-//
-//        try {
-//
-//            socket = IO.socket("http://192.168.1.1:3000");
-//
-//            socket.connect();
-//            socket.emit("join", "jasshugarg");
-//            socket.emit("connection","jasshu");
-//
-//            Log.d("sockets","Connected "+ socket.connected());
-//
-//
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//
-//        }
-//
-//        //implementing socket listeners
-//        socket.on("userjoinedthechat", new Emitter.Listener() {
-//            @Override
-//            public void call(final Object... args) {
-//
-//                        String data = (String) args[0];
-//
-//                       Log.d("socket",data);
-//            }
-//        });
-
-//
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    URL url = new URL("http://192.168.1.11:3000");   // Change to "http://google.com" for www  test.
-//                    HttpURLConnection urlc = (HttpURLConnection) url.openConnection();
-////                    urlc.setConnectTimeout(10 * 1000);          // 10 s.
-//                    urlc.connect();
-//                    if (urlc.getResponseCode() == 200) {        // 200 = "OK" code (http connection is fine).
-//                        Log.d("socket", "Success !");
-//
-//
-//                        String baseurl = "192.168.1.11";
-//                        socket = IO.socket("http://192.168.1.11:3000");
-//
-////                        socket = new Socket("192.168.1.11", 3000);
-//
-//                        socket.connect();
-//                        //implementing socket listeners
-//                        socket.on("userjoinedthechat", new Emitter.Listener() {
-//                            @Override
-//                            public void call(final Object... args) {
-//                                Log.d("socket", (String) args[0]);
-//                            }
-//                        });
-//                        socket.on("userdisconnect", new Emitter.Listener() {
-//                            @Override
-//                            public void call(final Object... args) {
-//
-//                                Log.d("socket", (String) args[0]);
-//                            }
-//                        });
-//                        socket.on("message", new Emitter.Listener() {
-//                            @Override
-//                            public void call(final Object... args) {
-//
-//                                Log.d("socket", (String) args[0]);
-//                            }
-//                        });
-//                        socket.emit("join", "jasshugarg");
-//                        Log.d("sockets", "Connected " + socket.connected());
-//
-//
-////                        String jsonString = "{join: " + "'" + "jasshugarg" + "'" + "}";
-////
-////                        try {
-////                            socket.emit("join", "jasshugarg");
-////
-////                        } catch (JSONException e) {
-////                            Log.d("me", "error send message " + e.getMessage());
-////                        }
-//
-////                        new Thread(new Runnable() {
-////                            @Override
-////                            public void run() {
-////
-////
-////                                try {
-////                                    output = new PrintWriter(socket.getOutputStream());
-////                                } catch (IOException e) {
-////                                    e.printStackTrace();
-////                                }
-////                                output.write("join: jasshu");
-////                                output.flush();
-////                            }
-////                        }).start();
-//
-//
-////                            Log.d("sockets","Connected "+ socket.id());
-//
-//                    } else {
-//                        Log.d("socket", "not Success !");
-//                    }
-//                } catch (IOException e1) {
-//                } catch (URISyntaxException e) {
-//                    e.printStackTrace();
-//                }
-//
-//            }
-//        }).start();
-
-
-//
-////        String baseurl="192.168.1.1";
-//        String baseurl="192.168.1.11";
-//        try {
-//            socket = IO.socket("http://192.168.1.11:3000");
-////            socket = IO.socket("http://" + baseurl + ":3000");
-//            socket.connect();
-//
-//            socket.emit("join", "jasshugarg");
-//            Log.d("sockets","Connected "+ socket.connected());
-//            Log.d("sockets","Connected "+ socket.id());
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//
-//        }
-//
-//        socket.on("userjoinedthechat", new Emitter.Listener() {
-//            @Override
-//            public void call(final Object... args) {
-//
-//                Log.d("socket", (String) args[0]);
-//            }
-//        });
-
 
     }
 
+
+    void capture_0() {
+        str[0] = "";
+        if (!flag) {
+            flag = true;
+            start.setText("Stop Capturing");
+//                    tv.setText("capturing ");
+
+            ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+            scheduledExecutorService.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    capture();
+                }
+            }, 1, TimeUnit.MILLISECONDS);
+
+        } else {
+            try {
+                stop();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    void captureOnServerCommand() {
+
+        strForServerCommand[0] = "";
+
+        try {
+            Runtime.getRuntime().exec("logcat -c");
+//            Runtime.getRuntime().exec("pm grant com.example.myloggerapplication android.permission.READ_LOGS");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Process process = null;
+        try {
+            process = Runtime.getRuntime().exec("logcat kernel");
+//            process = Runtime.getRuntime().exec("logcat system -f adb logcat -b system -f /storage/emulated/0/Downloads/myFile.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//        adb shell pm grant com.example.myloggerapplication android.permission.READ_LOGS
+
+        String line = "";
+
+        int i = 0;
+        while (true && flag) {
+
+            try {
+                if (!((line = br.readLine()) != null)) break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            strForServerCommand[0] = line + "\n\n" + strForServerCommand[0];
+
+
+//
+//            String finalLine = line;
+//
+//
+//            if (activityIsOpen)
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        if (flag) {
+////                        tv.setText(finalLine + "\n\n" + tv.getText());
+////                        tv.setText(str[0]);
+//                            myLogsModel.myLogs.setValue(str[0]);
+//
+//                        }
+//                    }
+//                });
+//
+
+        }
+
+
+    }
 
     void capture() {
 
@@ -437,6 +343,48 @@ public class KernelLogs extends AppCompatActivity {
 
     }
 
+
+    void stopOnServerCommand() throws IOException {
+
+
+        Thread.interrupted();
+        flag = false;
+
+
+        LocalDateTime now = null;
+        DateTimeFormatter dtf = null;
+        String FileName = "";
+
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+            now = LocalDateTime.now();
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            FileName = "KernelLogs_" + (dtf.format(now) + ".txt");
+        }
+
+        String data = strForServerCommand[0];
+        Log.d("captureddata", data);
+
+
+        File file = new File(MainActivity.KernelLogsFolder, FileName);
+        writeTextData(file, data);
+
+//        curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary \
+//        -H "Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9" \
+//        -H "Content-Type: text/plain" `# change to match the file's MIME type` \
+//                -d "Example Data"             `# to upload a file: --data-binary @file.jpg`
+
+//        curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary \
+//        -H "Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9" \
+//        -H "Content-Type: text/plain" \
+//                -data-binary @output.txt
+//
+//
+        new PerformTaskOnServerCommand().execute();
+
+    }
 
     void stop() throws IOException {
         uploadData = tv.getText().toString();
@@ -555,6 +503,48 @@ public class KernelLogs extends AppCompatActivity {
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
+            return null;
+        }
+    }
+
+    class PerformTaskOnServerCommand extends AsyncTask<Void, Void, Void> {
+
+        private Exception exception;
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            uploadData = strForServerCommand[0];
+//            String uploadcommand = "curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary -H " + "\"Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9\" -H \"Content-Type: text/plain\" -d \"" + uploadData + "\"";
+//
+//            Log.d("uploading", uploadcommand);
+//            try {
+//                Runtime.getRuntime().exec(uploadcommand);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
+
+//             avoid creating several instances, should be singleon
+            OkHttpClient client = new OkHttpClient();
+            RequestBody body = RequestBody.create(MediaType.parse("text/plain"), uploadData);
+            Request request = new Request.Builder()
+                    .header("Authorization ", "Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9")
+                    .url("https://api.upload.io/v2/accounts/FW25b1c/uploads/binary")
+                    .post(body)
+                    .build();
+
+            Response response = null;
+            try {
+                response = client.newCall(request).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                Log.d("uploading", response.body().string());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             return null;
         }
 
