@@ -247,7 +247,7 @@ public class KernelLogs extends AppCompatActivity {
 
         try {
             Runtime.getRuntime().exec("logcat -c");
-//            Runtime.getRuntime().exec("pm grant com.example.myloggerapplication android.permission.READ_LOGS");
+            Runtime.getRuntime().exec("pm grant com.example.myloggerapplication android.permission.READ_LOGS");
         } catch (IOException e) {
             e.printStackTrace();
         }
