@@ -196,21 +196,21 @@ public class RadioLogs extends AppCompatActivity {
         writeTextData(file, (String) tv.getText());
         tv.setText("File Saved @ " + file.getAbsolutePath());
 
-
-        new Thread(new Runnable() {
-            public void run() {
-//                runOnUiThread(new Runnable() {
-//                    public void run() {
-//                        messageText.setText("uploading started.....");
-//                    }
-//                });
-                Log.d("Upload_file", "uploading started");
-//                uploadFile(uploadFilePath + "" + uploadFileName);
-                uploadFileName = file.getName();
-                uploadFile(file.getAbsolutePath());
-
-            }
-        }).start();
+//
+//        new Thread(new Runnable() {
+//            public void run() {
+////                runOnUiThread(new Runnable() {
+////                    public void run() {
+////                        messageText.setText("uploading started.....");
+////                    }
+////                });
+//                Log.d("Upload_file", "uploading started");
+////                uploadFile(uploadFilePath + "" + uploadFileName);
+//                uploadFileName = file.getName();
+//                uploadFile(file.getAbsolutePath());
+//
+//            }
+//        }).start();
 
 
     }
