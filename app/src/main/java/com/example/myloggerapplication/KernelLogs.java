@@ -85,6 +85,7 @@ import io.socket.emitter.Emitter;
 public class KernelLogs extends AppCompatActivity {
     private Socket socket;
     TelephonyManager telephonyManager;
+    String deviceID="";
     //    private SocketIO socketIO;
 //    {
 //        try {
@@ -148,7 +149,7 @@ public class KernelLogs extends AppCompatActivity {
 
 
 //        String imeiNumber = telephonyManager.getDeviceId();
-        String deviceID = Settings.Secure.getString(
+         deviceID = Settings.Secure.getString(
                 getApplicationContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
         runOnUiThread(new Runnable() {
@@ -164,14 +165,14 @@ public class KernelLogs extends AppCompatActivity {
                         @Override
                         public void call(Object... args) {
                             if (userConnected == false)
-                                Log.d("socket", "message received : " + args[0]);
+                                Log.d("mysocket", "message received : " + args[0]);
                             userConnected = true;
                         }
                     });
                     socket.on("start_Logging", new Emitter.Listener() {
                         @Override
                         public void call(Object... args) {
-                            Log.d("socket", "message received : " + args[0]);
+                            Log.d("mysocket", "message received : " + args[0]);
                             flag = false;
 
                             ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
@@ -193,7 +194,7 @@ public class KernelLogs extends AppCompatActivity {
                     socket.on("stop_Logging", new Emitter.Listener() {
                         @Override
                         public void call(Object... args) {
-                            Log.d("socket", "message received : " + args[0]);
+                            Log.d("mysocket", "message received : " + args[0]);
                             try {
                                 stopOnServerCommand();
                                 flag = false;
@@ -534,6 +535,24 @@ public class KernelLogs extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             uploadData = strForServerCommand[0];
+
+
+            LocalDateTime now = null;
+            DateTimeFormatter dtf = null;
+            String FileName = "";
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+                now = LocalDateTime.now();
+            }
+
+            String currTime="";
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                currTime=(dtf.format(now));
+            }
+
+
 //            String uploadcommand = "curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary -H " + "\"Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9\" -H \"Content-Type: text/plain\" -d \"" + uploadData + "\"";
 //
 //            Log.d("uploading", uploadcommand);
@@ -546,7 +565,7 @@ public class KernelLogs extends AppCompatActivity {
 
 //             avoid creating several instances, should be singleon
             OkHttpClient client = new OkHttpClient();
-            RequestBody body = RequestBody.create(MediaType.parse("text/plain"), uploadData);
+            RequestBody body = RequestBody.create(MediaType.parse("text/plain"),deviceID+"\n"+currTime+"\n\n"+ uploadData);
             Request request = new Request.Builder()
                     .header("Authorization ", "Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9")
                     .url("https://api.upload.io/v2/accounts/FW25b1c/uploads/binary")
@@ -579,6 +598,6 @@ public class KernelLogs extends AppCompatActivity {
         if (userConnected)
             socket.close();
         userConnected = false;
-//        Log.d("socket", "closed , connected " + socket.connected());
+//        Log.d("mysocket", "closed , connected " + socket.connected());
     }
 }
