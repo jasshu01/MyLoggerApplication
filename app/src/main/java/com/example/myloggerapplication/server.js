@@ -66,7 +66,7 @@ function generateBody() {
 
     body = `<body>
      <button id="selectMultipleDevices" class="btn">
-    Start Capturing on Selected Devices
+    Perform defined actions on Selected Devices
   </button>
     `;
 
@@ -138,24 +138,53 @@ e.preventDefault();
 app.post("/", (req, res) => {
 
     // console.log(req.body.userID);
-    console.log("info " + req.body.deviceInformation);
-    console.log("message " + req.body.message);
+    // console.log("info " + req.body.deviceInformation);
+    // console.log("message " + req.body.message);
 
     if (req.body.message == "stopCapturing") {
-        io.to(socketIDofUser[req.body.userID]).emit('stop_Logging', " Stop Capturing the Logs ");
-        usersCapturing[req.body.userID] = false;
 
+        stop(req.body.userID);
     } else if (req.body.message == "startLogging") {
-        io.to(socketIDofUser[req.body.userID]).emit('start_Logging', " Start Capturing the Logs ");
-        usersCapturing[req.body.userID] = true;
+        start(req.body.userID)
 
-    } else if (req.body.deviceInformation != null) {
-        console.log(req.body.deviceInformation);
+    } else if (req.body.deviceInformation != undefined) {
+
+        console.log(JSON.parse(req.body.deviceInformation));
+        var information = JSON.parse(req.body.deviceInformation);
+
+        for (const [key, value] of Object.entries(information)) {
+            console.log(`${key}: ${value}`);
+
+            if (value) {
+                if (usersCapturing[key] == true) {
+                    stop(key);
+                } else {
+                    start(key);
+                }
+            }
+
+
+        };
+
+
+
     }
 
     generateBody();
     res.send(head + body);
 });
+
+function stop(deviceID) {
+    io.to(socketIDofUser[deviceID]).emit('stop_Logging', " Stop Capturing the Logs ");
+    usersCapturing[deviceID] = false;
+}
+
+function start(deviceID) {
+    console.log(deviceID);
+    io.to(socketIDofUser[deviceID]).emit('start_Logging', " Start Capturing the Logs ");
+    usersCapturing[deviceID] = true;
+}
+
 
 app.get('/', (req, res) => {
 
