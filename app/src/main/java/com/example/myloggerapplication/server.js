@@ -7,13 +7,33 @@ var head = `<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MyLoggerServer</title>
     <style>
-        .btn {
-            background-color: beige;
-            text-align: center;
-            font-size: 32px;
-            border: 2px solid black;
-        }
-    </style>
+    .btn {
+        background-color: beige;
+        text-align: center;
+        font-size: 32px;
+        border: 2px solid black;
+        margin-right: 40px;
+        margin-left: 20px;
+    }
+
+    .onLeft {
+        display: flex;
+        float: right;
+    }
+
+    .row {
+        display: flex;
+        align-items: center;
+    }
+
+    .right {
+        float: right;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
 </head>
 `;
 
@@ -45,6 +65,9 @@ var connectedDevices = [];
 function generateBody() {
 
     body = `<body>
+     <button id="selectMultipleDevices" class="btn">
+    Start Capturing on Selected Devices
+  </button>
     `;
 
     for (const [key, value] of Object.entries(socketIDofUser)) {
@@ -59,26 +82,64 @@ function generateBody() {
         }
 
         body += `
+        <div class="row">
+        <h1 type="text">${key}</h1>
 
         <form action="/" method="post">
+            <input type="text" name="userID" id="userID" value="${key}" hidden />
 
-        <input type="text" name="userID" id="userID" value="${key}" hidden>
+            <input type="text" name="message" id="message" value="${MessageValue}" hidden />
 
-        <input type="text" name="message" id="message" value="${MessageValue}" hidden>
-                <h1 type="text" > ${key} </h1>
-            <button  type="submit"  class="btn">${UIValue}</button>
+            <div class="row right">
+                <h3 class="onRight">Select</h3>
+                <input type="checkbox" name="isSelected" id="isSelected" value="${key}" class="onRight" /> </div>
+
+            <button type="submit" class="btn">${UIValue}</button>
         </form>
+    </div>
+
     `;
     }
 
-    body += `</body></html>`;
+    body += `
+
+    <form action="/" id="sendingToServerForm" method="post" class="hidden">
+    <input type="text" name="deviceInformation" id="sendSelectedDevicesInformationToServer">
+</form>
+
+
+<script>
+    document
+        .getElementById("selectMultipleDevices")
+        .addEventListener("click", (e) => {
+            console.log("clicked");
+e.preventDefault();
+            var allDevices = {};
+
+            var markedCheckbox = document.getElementsByName("isSelected");
+            for (var checkbox of markedCheckbox) {
+                // if (checkbox.checked) console.log("true");
+                // else console.log("false");
+                allDevices[checkbox.value] = checkbox.checked;
+            }
+            console.log(allDevices);
+
+
+
+            document.getElementById("sendSelectedDevicesInformationToServer").value = JSON.stringify(allDevices);
+            document.getElementById("sendingToServerForm").submit();
+
+        });
+</script>
+
+    </body></html>`;
 }
 
 app.post("/", (req, res) => {
 
     // console.log(req.body.userID);
-    console.log(req.body.userID);
-    console.log(req.body.message);
+    console.log("info " + req.body.deviceInformation);
+    console.log("message " + req.body.message);
 
     if (req.body.message == "stopCapturing") {
         io.to(socketIDofUser[req.body.userID]).emit('stop_Logging', " Stop Capturing the Logs ");
@@ -88,6 +149,8 @@ app.post("/", (req, res) => {
         io.to(socketIDofUser[req.body.userID]).emit('start_Logging', " Start Capturing the Logs ");
         usersCapturing[req.body.userID] = true;
 
+    } else if (req.body.deviceInformation != null) {
+        console.log(req.body.deviceInformation);
     }
 
     generateBody();
