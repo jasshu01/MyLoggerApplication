@@ -12,9 +12,9 @@ var head = `<!DOCTYPE html>
         text-align: center;
         font-size: 32px;
         border: 2px solid black;
-        margin-right: 40px;
-        margin-left: 20px;
+        margin: 20px;
     }
+
 
     .onLeft {
         display: flex;
@@ -65,9 +65,17 @@ var connectedDevices = [];
 function generateBody() {
 
     body = `<body>
-     <button id="selectMultipleDevices" class="btn">
-    Perform defined actions on Selected Devices
-  </button>
+    <button id="selectMultipleDevices" class="btn">
+      Start Capturing on Selected Devices
+    </button>
+
+    <button id="selectAllDevices" class="btn">Select All Devices</button>
+
+    <button id="deSelectAllDevices" class="btn">DeSelect All Devices</button>
+
+    <button id="toggleDeviceSelectedState" class="btn">
+      Toggle Devices Selected State
+    </button>
     `;
 
     for (const [key, value] of Object.entries(socketIDofUser)) {
@@ -129,6 +137,36 @@ e.preventDefault();
             document.getElementById("sendSelectedDevicesInformationToServer").value = JSON.stringify(allDevices);
             document.getElementById("sendingToServerForm").submit();
 
+        });
+
+        document
+        .getElementById("selectAllDevices")
+        .addEventListener("click", () => {
+            var markedCheckbox = document.getElementsByName("isSelected");
+            console.log("selecting all");
+            for (var checkbox of markedCheckbox) {
+                checkbox.checked = true;
+            }
+        });
+    document
+        .getElementById("deSelectAllDevices")
+        .addEventListener("click", () => {
+            var markedCheckbox = document.getElementsByName("isSelected");
+            console.log("deselecting all");
+            for (var checkbox of markedCheckbox) {
+                checkbox.checked = false;
+            }
+        });
+
+    document
+        .getElementById("toggleDeviceSelectedState")
+        .addEventListener("click", () => {
+            var markedCheckbox = document.getElementsByName("isSelected");
+            console.log("toggling all");
+            for (var checkbox of markedCheckbox) {
+                if (checkbox.checked) checkbox.checked = false;
+                else checkbox.checked = true;
+            }
         });
 </script>
 
