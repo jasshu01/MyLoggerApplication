@@ -1,3 +1,58 @@
+var loginCode = `
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        input {
+            margin: 20px;
+            font-size: 30px;
+            width: 100%;
+        }
+
+        body {
+            height: 100vh;
+            align-content: center;
+            justify-content: center;
+        }
+
+        button {
+            margin: 20px;
+            font-size: 30px;
+            align-self: center;
+            cursor: pointer;
+        }
+
+        #loginComponents {
+            width: 20%;
+            height: 20%;
+            margin: auto;
+            margin-top: 50vh;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loginComponents">
+
+
+        <form action="/" method="post">
+            <input type="text" placeholder="Enter Username" name="username" id="username">
+            <br>
+            <input type="password" placeholder="Enter Password" name="password" id="password">
+            <br>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+
+</html>
+`;
 var head = `<!DOCTYPE html>
 <html lang="en">
 
@@ -37,7 +92,7 @@ var head = `<!DOCTYPE html>
 </head>
 <body>
     <button id="selectMultipleDevices" class="btn">
-      Start Capturing on Selected Devices
+    Perform defined actions on Selected Devices
     </button>
 
     <button id="selectAllDevices" class="btn">Select All Devices</button>
@@ -62,17 +117,29 @@ const express = require('express'),
     server = http.createServer(app),
     io = require('socket.io')().listen(server);
 
+const { ifError } = require('assert');
 var bodyParser = require('body-parser')
+var session = require('express-session')
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
 
 // parse application/json
 app.use(bodyParser.json())
+app.use(session({
+    secret: 'MacChromeBrowser',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }
+}))
 
 var socketIDofUser = {};
 var usersCapturing = {};
 var connectedDevices = [];
+
+
+
+
 
 function generateBody() {
 
@@ -191,7 +258,13 @@ app.post("/", (req, res) => {
     // console.log("info " + req.body.deviceInformation);
     // console.log("message " + req.body.message);
 
-    if (req.body.message == "stopCapturing") {
+
+
+    if (req.body.password != undefined) {
+        console.log(req.body.username);
+        console.log(req.body.password);
+        req.session.userName = req.body.username;
+    } else if (req.body.message == "stopCapturing") {
 
         stop(req.body.userID);
     } else if (req.body.message == "startLogging") {
@@ -236,12 +309,22 @@ function start(deviceID) {
 }
 
 
+app.get('/login', (req, res) => {
+
+    res.send(loginCode);
+
+});
+
 app.get('/', (req, res) => {
 
-    generateBody();
-    res.send(head + body);
-    // res.sendFile(path.join(__dirname + "/index.html"));
-    // res.send('Chat Server is running on port 3000')
+    if (req.session.userName == undefined)
+        res.send(loginCode);
+    else {
+        generateBody();
+        res.send(head + body);
+    }
+
+
 });
 
 var userConnected = false;
