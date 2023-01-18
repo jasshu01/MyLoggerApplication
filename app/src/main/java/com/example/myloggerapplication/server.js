@@ -108,6 +108,14 @@ var head = `<!DOCTYPE html>
 var body = ``;
 
 
+var validCredentials = [{
+    username: "jasshugarg",
+    password: "Jasshu@12"
+}, {
+    username: "jasshu01",
+    password: "Jasshu@01"
+
+}]
 
 
 const express = require('express'),
@@ -263,7 +271,14 @@ app.post("/", (req, res) => {
     if (req.body.password != undefined) {
         console.log(req.body.username);
         console.log(req.body.password);
-        req.session.userName = req.body.username;
+
+        var result = validCredentials.find(({ username }) => username === req.body.username);
+        console.log(result);
+        if (result != undefined && result.password === req.body.password) {
+            req.session.userName = req.body.username;
+        }
+
+
     } else if (req.body.message == "stopCapturing") {
 
         stop(req.body.userID);
@@ -293,8 +308,14 @@ app.post("/", (req, res) => {
 
     }
 
-    generateBody();
-    res.send(head + body);
+    if (req.session.userName == undefined)
+        res.send(loginCode);
+    else {
+        generateBody();
+        res.send(head + body);
+    }
+
+
 });
 
 function stop(deviceID) {
