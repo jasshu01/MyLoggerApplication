@@ -35,6 +35,18 @@ var head = `<!DOCTYPE html>
     }
 </style>
 </head>
+<body>
+    <button id="selectMultipleDevices" class="btn">
+      Start Capturing on Selected Devices
+    </button>
+
+    <button id="selectAllDevices" class="btn">Select All Devices</button>
+
+    <button id="deSelectAllDevices" class="btn">DeSelect All Devices</button>
+
+    <button id="toggleDeviceSelectedState" class="btn">
+      Toggle Devices Selected State
+    </button>
 `;
 
 
@@ -64,21 +76,14 @@ var connectedDevices = [];
 
 function generateBody() {
 
-    body = `<body>
-    <button id="selectMultipleDevices" class="btn">
-      Start Capturing on Selected Devices
-    </button>
-
-    <button id="selectAllDevices" class="btn">Select All Devices</button>
-
-    <button id="deSelectAllDevices" class="btn">DeSelect All Devices</button>
-
-    <button id="toggleDeviceSelectedState" class="btn">
-      Toggle Devices Selected State
-    </button>
+    body = `
     `;
 
+
+    var noDeviceConnectd = true;
+
     for (const [key, value] of Object.entries(socketIDofUser)) {
+        noDeviceConnectd = false;
         console.log(`${key}: ${value}`);
         var MessageValue = "startLogging";
 
@@ -108,6 +113,11 @@ function generateBody() {
 
     `;
     }
+
+    if (noDeviceConnectd) {
+        body += `<h1>No Device Connected</h1>`
+    }
+
 
     body += `
 
@@ -172,6 +182,8 @@ e.preventDefault();
 
     </body></html>`;
 }
+
+
 
 app.post("/", (req, res) => {
 
