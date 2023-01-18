@@ -149,6 +149,25 @@ var connectedDevices = [];
 
 
 
+var mongoose = require("mongoose");
+var DB = `mongodb+srv://jasshugarg:Yashu1801@pizzaclub.4rjeu.mongodb.net/PizzaClub?retryWrites=true&w=majority`;
+// mongoose.set('strictQuery', true)
+mongoose.connect(DB, {
+
+}).then(() => {
+    console.log("connection successful");
+}).catch((err) = console.log("no connection"));
+const ownerSchema = new mongoose.Schema({
+    username: String,
+    password: String
+})
+
+const Owner = mongoose.model('Owner', ownerSchema);
+
+
+
+
+
 function generateBody() {
 
     body = `
@@ -273,47 +292,93 @@ app.post("/", (req, res) => {
         console.log(req.body.password);
 
         var result = validCredentials.find(({ username }) => username === req.body.username);
-        console.log(result);
-        if (result != undefined && result.password === req.body.password) {
-            req.session.userName = req.body.username;
+        console.log("result " + result);
+        // if (result != undefined && result.password === req.body.password) {
+        //     req.session.userName = req.body.username;
+        // }
+
+
+
+
+
+        var MongoClient = require('mongodb').MongoClient;
+
+        MongoClient.connect(DB, { useUnifiedTopology: true }, function(err, db) {
+            if (err) throw err;
+            var dbo = db.db("PizzaClub");
+            dbo.collection("ownerlogin").find().toArray(function(err, result) {
+                if (err) throw err;
+                for (i = 0; i < result.length; i++) {
+                    if (result[i].username === req.body.username) {
+                        myUsername = req.body.username;
+                        console.log("username matched " + req.body.username)
+                        if (result[i].password === req.body.password) {
+
+                            req.session.userName = req.body.username;
+                            console.log("set session username" + req.session.userName);
+                            console.log("password matched");
+
+                            done = 1;
+                            break;
+
+                        }
+                    }
+                }
+
+                console.log("session username " + req.session.userName);
+                if (req.session.userName == undefined)
+                    res.send(loginCode);
+                else {
+                    generateBody();
+                    res.send(head + body);
+                }
+
+
+
+            });
+        });
+
+
+
+
+    } else {
+        if (req.body.message == "stopCapturing") {
+
+            stop(req.body.userID);
+        } else if (req.body.message == "startLogging") {
+            start(req.body.userID)
+
+        } else if (req.body.deviceInformation != undefined) {
+
+            console.log(JSON.parse(req.body.deviceInformation));
+            var information = JSON.parse(req.body.deviceInformation);
+
+            for (const [key, value] of Object.entries(information)) {
+                console.log(`${key}: ${value}`);
+
+                if (value) {
+                    if (usersCapturing[key] == true) {
+                        stop(key);
+                    } else {
+                        start(key);
+                    }
+                }
+
+
+            };
+
+
+
         }
 
-
-    } else if (req.body.message == "stopCapturing") {
-
-        stop(req.body.userID);
-    } else if (req.body.message == "startLogging") {
-        start(req.body.userID)
-
-    } else if (req.body.deviceInformation != undefined) {
-
-        console.log(JSON.parse(req.body.deviceInformation));
-        var information = JSON.parse(req.body.deviceInformation);
-
-        for (const [key, value] of Object.entries(information)) {
-            console.log(`${key}: ${value}`);
-
-            if (value) {
-                if (usersCapturing[key] == true) {
-                    stop(key);
-                } else {
-                    start(key);
-                }
-            }
-
-
-        };
-
-
-
+        if (req.session.userName == undefined)
+            res.send(loginCode);
+        else {
+            generateBody();
+            res.send(head + body);
+        }
     }
 
-    if (req.session.userName == undefined)
-        res.send(loginCode);
-    else {
-        generateBody();
-        res.send(head + body);
-    }
 
 
 });
