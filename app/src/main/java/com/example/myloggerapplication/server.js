@@ -668,6 +668,13 @@ var head = `<!DOCTYPE html>
     <button id="toggleDeviceSelectedState" class="btn">
       Toggle Devices Selected State
     </button>
+
+        <form action="/logout" method="get" id="logoutForm">
+
+        <button class="btn">Logout</button>
+
+        </form>
+
 `;
 
 
@@ -918,9 +925,9 @@ app.post("/", (req, res) => {
 
             console.log(JSON.parse(req.body.deviceInformation));
             var information = JSON.parse(req.body.deviceInformation);
-
+            console.log("info " + information);
             for (const [key, value] of Object.entries(information)) {
-                console.log(`${key}: ${value}`);
+                // console.log(`${key}: ${value}`);
 
                 if (value) {
                     if (usersCapturing[key] == true) {
@@ -964,6 +971,13 @@ function start(deviceID) {
 app.get('/login', (req, res) => {
 
     res.send(loginCode);
+
+});
+app.get('/logout', (req, res) => {
+
+    req.session.destroy();
+    res.redirect("/");
+    // res.send(loginCode);
 
 });
 
