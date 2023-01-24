@@ -21,14 +21,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+//import com.squareup.okhttp.MediaType;
+//import com.squareup.okhttp.OkHttpClient;
+//import com.squareup.okhttp.Request;
+//import com.squareup.okhttp.RequestBody;
+//import com.squareup.okhttp.Response;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
@@ -41,6 +42,12 @@ import java.util.concurrent.TimeUnit;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -81,14 +88,10 @@ public class MainActivity extends AppCompatActivity {
         BugReportsFolder.mkdir();
 
 
-
-
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     EXTERNAL_STORAGE_PERMISSION_CODE);
         }
-
-
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     WRITE_EXTERNAL_STORAGE_PERMISSION_CODE);
@@ -97,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET},
                     INTERNET_PERMISSION_CODE);
         }
-
 
 
         RadioLogs.setOnClickListener(new View.OnClickListener() {
@@ -150,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private Socket socket;
     TelephonyManager telephonyManager;
     String deviceID = "";
@@ -159,8 +160,7 @@ public class MainActivity extends AppCompatActivity {
     final String[] strForServerCommand = {""};
     String uploadData = "";
 
-    public void connectToServer()
-    {
+    public void connectToServer() {
         telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, 101);
@@ -277,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
     void stopOnServerCommand() throws IOException {
 
 
@@ -301,9 +302,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d("captureddata", data);
 
 
-        File file = new File(MainActivity.KernelLogsFolder, FileName);
-//        writeTextData(file, data);
-
 //        curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary \
 //        -H "Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9" \
 //        -H "Content-Type: text/plain" `# change to match the file's MIME type` \
@@ -314,8 +312,34 @@ public class MainActivity extends AppCompatActivity {
 //        -H "Content-Type: text/plain" \
 //                -data-binary @output.txt
 //
+
 //
-        new PerformTaskOnServerCommand().execute();
+
+        uploadData = strForServerCommand[0];
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+            now = LocalDateTime.now();
+        }
+
+        String currTime = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            currTime = (dtf.format(now));
+        }
+
+        String finalUploadData = deviceID + "\n" + currTime + "\n\n" + uploadData;
+
+        File file = new File(MainActivity.ApplicationFolder, FileName);
+        writeTextData(file, finalUploadData);
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+        upload(file);
+//            }
+//        }).start();
+//        new PerformTaskOnServerCommand().execute();
 
     }
 
@@ -339,41 +363,137 @@ public class MainActivity extends AppCompatActivity {
                 now = LocalDateTime.now();
             }
 
-            String currTime="";
+            String currTime = "";
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                currTime=(dtf.format(now));
+                currTime = (dtf.format(now));
             }
-            OkHttpClient client = new OkHttpClient();
 
-            String finalUploadData=deviceID+"\n"+currTime+"\n\n"+ uploadData;
+            String finalUploadData = deviceID + "\n" + currTime + "\n\n" + uploadData;
+
+            File file = new File(MainActivity.ApplicationFolder, FileName);
+            writeTextData(file, finalUploadData);
+
+////
+//            RequestBody body = RequestBody.create(MediaType.parse("text/plain"), new File(file.getAbsolutePath()));
+//            Request request = new Request.Builder()
+//                    .header("Authorization", "Bearer public_12a1xwJGEfWrJviHJAESB6scftus")
+//                    .url("https://api.upload.io/v2/accounts/12a1xwJ/uploads/form_data")
+//                    .post(body)
+//                    .build();
+
+//            OkHttpClient client = new OkHttpClient();
+//
+////            MediaType mediaType = MediaType.parse("text/plain");
+////            RequestBody body = new MultipartBody.Builder()
+////                    .setType(MultipartBody.FORM)
+////                    .addFormDataPart("file", "myname.txt", RequestBody.create(mediaType, new File(file.getAbsolutePath())))
+////                    .build();
+////
+////            Request request = new Request.Builder()
+////                    .url("https://api.upload.io/v2/accounts/12a1xwJ/uploads/binary")
+////                    .post(body)
+////                    .addHeader("Authorization", "Bearer public_12a1xwJGEfWrJviHJAESB6scftus")
+////                    .build();
+////
+//            MediaType mediaType = MediaType.parse("text/plain");
+//            RequestBody body = new MultipartBody.Builder()
+//                    .setType(MultipartBody.FORM)
+//                    .addFormDataPart("file", file.getName(), RequestBody.create(mediaType, new File(file.getAbsolutePath())))
+//                    .build();
+//
+//            Request request = new Request.Builder()
+//                    .url("https://api.upload.io/v2/accounts/12a1xwJ/uploads/form_data")
+//                    .post(body)
+//                    .addHeader("Authorization", "Bearer public_12a1xwJGEfWrJviHJAESB6scftus")
+//                    .build();
 
 
-            RequestBody body = RequestBody.create(MediaType.parse("text/plain"),finalUploadData);
-            Request request = new Request.Builder()
-                    .header("Authorization ", "Bearer public_12a1xwJGEfWrJviHJAESB6scftus")
-                    .url("https://api.upload.io/v2/accounts/12a1xwJ/uploads/binary")
-                    .post(body)
-                    .build();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    upload(file);
+                }
+            }).start();
 
 
+//
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    Response response = null;
+//                    try {
+//
+//                        response = client.newCall(request).execute();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                    try {
+//                        Log.d("uploading", response.body().string());
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }).start();
 
-            Response response = null;
-            try {
-                response = client.newCall(request).execute();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                Log.d("uploading", response.body().string());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             return null;
         }
 
         protected void onPostExecute(Void feed) {
             // TODO: check this.exception
             // TODO: do something with the feed
+        }
+    }
+
+
+    public void upload(File file) {
+
+//        String finalUploadData = "deviceID_uploadData";
+
+//        File file = new File(MainActivity.ApplicationFolder, "myFile.txt");
+//        writeTextData(file, finalUploadData);
+        OkHttpClient client = new OkHttpClient();
+
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", deviceID+"_"+file.getName(), RequestBody.create(mediaType, new File(file.getAbsolutePath())))
+                .build();
+
+        Request request = new Request.Builder()
+                .url("https://api.upload.io/v2/accounts/12a1xwJ/uploads/form_data")
+                .post(body)
+                .addHeader("Authorization", "Bearer public_12a1xwJGEfWrJviHJAESB6scftus")
+                .build();
+
+
+        Response response = null;
+        try {
+            response = client.newCall(request).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            Log.d("uploading", response.body().string());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeTextData(File file, String data) {
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(data.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

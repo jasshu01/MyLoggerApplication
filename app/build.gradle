@@ -1,12 +1,22 @@
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
+
+}
+
+ext {
+    play_services_version = "15.0.1"
+    support_version = "27.1.1"
 }
 
 android {
     namespace 'com.example.myloggerapplication'
     compileSdk 32
 
+
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
     defaultConfig {
         applicationId "com.example.myloggerapplication"
         minSdk 21
@@ -29,6 +39,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+
     }
 }
 
@@ -44,6 +55,7 @@ dependencies {
         exclude group: 'org.json', module: 'json'
     }
     implementation 'com.google.firebase:firebase-database:20.0.4'
+//    implementation files('libs/google-auth-library-credentials.jar')
     def lifecycle_version = "2.5.1"
 //    implementation 'com.github.jitpack:android-example:1.0.1'
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
@@ -60,4 +72,9 @@ dependencies {
         // excluding org.json which is provided by Android
         exclude group: 'org.json', module: 'json'
     }
+
+
+
+
+
 }
