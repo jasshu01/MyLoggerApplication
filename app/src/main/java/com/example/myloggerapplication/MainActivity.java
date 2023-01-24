@@ -314,19 +314,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d("captureddata", data);
 
 
-//        curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary \
-//        -H "Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9" \
-//        -H "Content-Type: text/plain" `# change to match the file's MIME type` \
-//                -d "Example Data"             `# to upload a file: --data-binary @file.jpg`
-
-//        curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary \
-//        -H "Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9" \
-//        -H "Content-Type: text/plain" \
-//                -data-binary @output.txt
-//
-
-//
-
         uploadData = strForServerCommand[0];
 
 
@@ -345,13 +332,9 @@ public class MainActivity extends AppCompatActivity {
         File file = new File(MainActivity.ApplicationFolder, FileName);
         writeTextData(file, finalUploadData);
 
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
+
         upload(file);
-//            }
-//        }).start();
-//        new PerformTaskOnServerCommand().execute();
+
 
     }
 
