@@ -542,6 +542,7 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', function() {
         console.log(' user has left ')
+
         socket.broadcast.emit("userdisconnect", socket.id + " user has left ")
         userConnected = false;
     });
