@@ -1,10 +1,6 @@
 package com.example.myloggerapplication;
 
-import static java.lang.Thread.sleep;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import static com.google.auth.oauth2.OAuth2Utils.JSON_FACTORY;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -22,20 +18,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.util.store.FileDataStoreFactory;
 
 import java.io.BufferedReader;
-import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
@@ -47,7 +48,12 @@ import java.util.concurrent.TimeUnit;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import io.socket.client.Socket;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,6 +73,33 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                String projectId = "logical-essence-375611";
+//                Storage storage = null;
+//
+////                try (InputStream json = new FileInputStream("/logical-essence-375611-921d1eaa1577.json")) {
+////                    Credentials credentials = Credentials.fromStream(json);
+////                } catch (Exception exception) {
+////
+////                }
+//
+//
+////                Credentials credentials = Credentials.fromStream("json");
+//
+//                storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+////                    storage = StorageOptions.newBuilder().setCredentials().setProjectId(projectId).build().getService();
+//                Page<Bucket> buckets = storage.list();
+//
+//                for (Bucket bucket : buckets.iterateAll()) {
+//                    Log.d("GCP", bucket.getName());
+//                }
+//            }
+//        }).start();
+
 
         RadioLogs = findViewById(R.id.radioLogs);
         ADBLogs = findViewById(R.id.adbLogs);
@@ -167,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private Socket socket;
     TelephonyManager telephonyManager;
     String deviceID = "";
@@ -176,8 +208,7 @@ public class MainActivity extends AppCompatActivity {
     final String[] strForServerCommand = {""};
     String uploadData = "";
 
-    public void connectToServer()
-    {
+    public void connectToServer() {
         telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, 101);
@@ -267,8 +298,7 @@ public class MainActivity extends AppCompatActivity {
 
         Process process = null;
         try {
-            process = Runtime.getRuntime().exec("logcat kernel");
-//            process = Runtime.getRuntime().exec("logcat system -f adb logcat -b system -f /storage/emulated/0/Downloads/myFile.txt");
+            process = Runtime.getRuntime().exec("logcat all");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -291,29 +321,11 @@ public class MainActivity extends AppCompatActivity {
             strForServerCommand[0] = line + "\n\n" + strForServerCommand[0];
 
 
-//
-//            String finalLine = line;
-//
-//
-//            if (activityIsOpen)
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        if (flag) {
-////                        tv.setText(finalLine + "\n\n" + tv.getText());
-////                        tv.setText(str[0]);
-//                            myLogsModel.myLogs.setValue(str[0]);
-//
-//                        }
-//                    }
-//                });
-//
-
         }
 
 
     }
+
     void stopOnServerCommand() throws IOException {
 
 
@@ -376,65 +388,37 @@ public class MainActivity extends AppCompatActivity {
                 now = LocalDateTime.now();
             }
 
-            String currTime="";
+            String currTime = "";
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                currTime=(dtf.format(now));
+                currTime = (dtf.format(now));
             }
+
+            String finalUploadData = deviceID + "\n" + currTime + "\n\n" + uploadData;
+
+            File file = new File(ApplicationFolder, FileName);
+            writeTextData(file, finalUploadData);
+
+
             OkHttpClient client = new OkHttpClient();
 
-            String finalUploadData=deviceID+"\n"+currTime+"\n\n"+ uploadData;
+            MediaType mediaType = MediaType.parse("application/octet-stream");
 
-//            String uploadcommand = "curl https://api.upload.io/v2/accounts/FW25b1c/uploads/binary -H " + "\"Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9\" -H \"Content-Type: text/plain\" -d \"" + uploadData + "\"";
-//
-//            Log.d("uploading", uploadcommand);
-//            try {
-//                Runtime.getRuntime().exec(uploadcommand);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-
-
-//             avoid creating several instances, should be singleon
-
-
-//            JSONObject jsonObject=new JSONObject();
-//            try {
-//                jsonObject.put("data",finalUploadData);
-//                jsonObject.put("folderpath","/"+deviceID);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//
-
-//            RequestBody body = RequestBody.create(MediaType.parse("application/json"), String.valueOf(jsonObject));
-//            Request request = new Request.Builder()
-//                    .header("Authorization ", "Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9")
-//                    .url("https://api.upload.io/v2/accounts/FW25b1c/uploads/binary/"+deviceID)
-//                    .post(body)
-//                    .build();
-
-
-
-
-
-//            RequestBody body = RequestBody.create(MediaType.parse("text/plain"),finalUploadData);
-//            Request request = new Request.Builder()
-//                    .header("Authorization ", "Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9")
-//                    .url("https://api.upload.io/v2/accounts/FW25b1c/uploads?folder=devices")
-//                    .post(body)
-//                    .build();
-
-//            curl https://api.upload.io/v2/accounts/FW25b1c/uploads?folder=devices -H "Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9" -H "Content-Type: text/plain"  -d "Example Data"
-//            curl -X POST -H "Authorization: Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9" -D "Hello" -F "folder=my_folder" https://upload.io/upload
-
-
-            RequestBody body = RequestBody.create(MediaType.parse("text/plain"),finalUploadData);
-            Request request = new Request.Builder()
-                    .header("Authorization ", "Bearer public_FW25b1cGPvomqGHEbkpyKP17i1N9")
-                    .url("https://api.upload.io/v2/accounts/FW25b1c/uploads/binary")
-                    .post(body)
+            RequestBody requestBody = RequestBody.create(mediaType, new File(file.getAbsolutePath()));
+            RequestBody body = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart(deviceID+"_"+currTime+".txt", deviceID+"_"+currTime+".txt",requestBody)
                     .build();
 
+//            Request request = new Request.Builder()
+//                    .header("Authorization ", "Bearer public_12a1xwJGEfWrJviHJAESB6scftus")
+//                    .url("https://api.upload.io/v2/accounts/12a1xwJ/uploads/binary")
+//                    .post(body)
+//                    .build();
+            Request request = new Request.Builder()
+                    .url("https://api.upload.io/v2/accounts/12a1xwJ/uploads/binary")
+                    .post(body)
+                    .addHeader("Authorization", "Bearer public_12a1xwJGEfWrJviHJAESB6scftus")
+                    .build();
 
 
             Response response = null;
@@ -443,11 +427,100 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            try {
-                Log.d("uploading", response.body().string());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+//            try {
+//                Log.d("uploading", response.body().string());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
+
+//
+//            // The ID of your GCP project
+//            String projectId = "logical-essence-375611";
+//
+//            // The ID of your GCS bucket
+//            String bucketName = "my_logger_application";
+//            String objectName = deviceID + "/" + currTime + ".txt";
+
+//            Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+//            BlobId blobId = BlobId.of(bucketName, objectName);
+//            BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+//            byte[] content = finalUploadData.getBytes(StandardCharsets.UTF_8);
+//            try {
+//                storage.createFrom(blobInfo, new ByteArrayInputStream(content));
+//                Log.d("GCP",
+//                        "Object "
+//                                + objectName
+//                                + " uploaded to bucket "
+//                                + bucketName
+//                                + " with contents "
+//                );
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+
+
+//            // The path to your file to upload
+//             String filePath = "/"+deviceID+"/"+currTime;
+//
+//            Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+//            BlobId blobId = BlobId.of(bucketName, objectName);
+//            BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+//
+//            // Optional: set a generation-match precondition to avoid potential race
+//            // conditions and data corruptions. The request returns a 412 error if the
+//            // preconditions are not met.
+//            Storage.BlobTargetOption precondition;
+//            if (storage.get(bucketName, objectName) == null) {
+//                // For a target object that does not yet exist, set the DoesNotExist precondition.
+//                // This will cause the request to fail if the object is created before the request runs.
+//                precondition = Storage.BlobTargetOption.doesNotExist();
+//            } else {
+//                // If the destination already exists in your bucket, instead set a generation-match
+//                // precondition. This will cause the request to fail if the existing object's generation
+//                // changes before the request runs.
+//                precondition =
+//                        Storage.BlobTargetOption.generationMatch(
+//                                storage.get(bucketName, objectName).getGeneration());
+//            }
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                storage.create(blobInfo, Storage.BlobTargetOption.userProject(finalUploadData), precondition);
+//            }
+////
+
+
+//            curl https://api.upload.io/v2/accounts/12a1xwJ/uploads/form_data -H "Authorization: Bearer public_12a1xwJGEfWrJviHJAESB6scftus" -F file=@image.jpg
+
+
+//            Log.d("GCP", "uploaded");
+////            System.out.println(
+//                    "File " + filePath + " uploaded to bucket " + bucketName + " as " + objectName);
+
+
+//            OkHttpClient client = new OkHttpClient();
+//
+//            RequestBody body = RequestBody.create(MediaType.parse("text/plain"),finalUploadData);
+//            Request request = new Request.Builder()
+//                    .header("Authorization ", "Bearer public_12a1xwJGEfWrJviHJAESB6scftus")
+//                    .url("https://api.upload.io/v2/accounts/FW25b1c/uploads/binary")
+//                    .post(body)
+//                    .build();
+//
+//
+//
+//            Response response = null;
+//            try {
+//                response = client.newCall(request).execute();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            try {
+//                Log.d("uploading", response.body().string());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
             return null;
         }
 
@@ -457,5 +530,77 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    private void writeTextData(File file, String data) {
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(data.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+//    public static String createFolder() throws IOException {
+//        // Load pre-authorized user credentials from the environment.
+//        // TODO(developer) - See https://developers.google.com/identity for
+//        // guides on implementing OAuth2 for your application.
+//        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
+//                .createScoped(Arrays.asList(DriveScopes.DRIVE_FILE));
+//        HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(
+//                credentials);
+//
+//        // Build a new authorized API client service.
+//        Drive service = new Drive.Builder(new NetHttpTransport(),
+//                GsonFactory.getDefaultInstance(),
+//                requestInitializer)
+//                .setApplicationName("Drive samples")
+//                .build();
+//        // File's metadata.
+//        File fileMetadata = new File();
+//        fileMetadata.setName("Test");
+//        fileMetadata.setMimeType("application/vnd.google-apps.folder");
+//        try {
+//            File file = service.files().create(fileMetadata)
+//                    .setFields("id")
+//                    .execute();
+//            System.out.println("Folder ID: " + file.getId());
+//            return file.getId();
+//        } catch (GoogleJsonResponseException e) {
+//            // TODO(developer) - handle error appropriately
+//            System.err.println("Unable to create folder: " + e.getDetails());
+//            throw e;
+//        }
+//    }
+
+    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
+            throws IOException {
+        // Load client secrets.
+        InputStream in = DriveQuickstart.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
+        if (in == null) {
+            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
+        }
+        GoogleClientSecrets clientSecrets =
+                GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+
+        // Build flow and trigger user authorization request.
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+                .setAccessType("offline")
+                .build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
+        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        //returns an authorized Credential object.
+        return credential;
+    }
 
 }
