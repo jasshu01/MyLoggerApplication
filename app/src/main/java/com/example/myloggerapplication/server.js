@@ -227,15 +227,15 @@ function generateBody() {
         if (usersCapturing[key] == false) {
             body += `
             <div class="row right center" id="${key}_typeOfLog">
-                <input type="radio" style="margin:10px" name="Logs"  id="${key}_radio">Radio Logs</input>
-                <input type="radio" style="margin:10px" name="Logs" id="${key}_adb">ADB Logs</input>
-                <input type="radio" style="margin:10px" name="Logs" id="${key}_kernel">Kernel Logs</input>
+                <input type="radio" style="margin:10px" name="Logs"  checked id="${key}_radio" value="radio">Radio Logs</input>
+                <input type="radio" style="margin:10px" name="Logs" id="${key}_adb" value="adb">ADB Logs</input>
+                <input type="radio" style="margin:10px" name="Logs" id="${key}_kernel" value="kernel">Kernel Logs</input>
             </div>
 `;
         } else {
             body += `
             <div class="row right center hidden" id="${key}_typeOfLog">
-                <input type="radio" style="margin:10px" name="Logs"  id="${key}_radio">Radio Logs</input>
+                <input type="radio" style="margin:10px" name="Logs"   id="${key}_radio">Radio Logs</input>
                 <input type="radio" style="margin:10px" name="Logs" id="${key}_adb">ADB Logs</input>
                 <input type="radio" style="margin:10px" name="Logs" id="${key}_kernel">Kernel Logs</input>
             </div>
@@ -273,7 +273,7 @@ function generateBody() {
             for (var checkbox of markedCheckbox) {
                 if (checkbox.checked)
                 {
-                    var typeOfLogs="radio";
+                    var typeOfLogs="none";
 
                     if(document.getElementById(checkbox.value+"_radio").checked)
                     {
@@ -406,7 +406,9 @@ app.post("/", (req, res) => {
 
             stop(req.body.userID);
         } else if (req.body.message == "startLogging") {
-            start(req.body.userID)
+
+            console.log(req.body.Logs);
+            start(req.body.userID, req.body.Logs)
 
         } else if (req.body.deviceInformation != undefined) {
 
@@ -414,15 +416,16 @@ app.post("/", (req, res) => {
             var information = JSON.parse(req.body.deviceInformation);
             console.log("info " + information);
             for (const [key, value] of Object.entries(information)) {
-                // console.log(`${key}: ${value}`);
+                console.log(`${key}: ${value}`);
 
-                if (value) {
-                    if (usersCapturing[key] == true) {
-                        stop(key);
+                if (value != false) {
+                    if (usersCapturing[key] == false) {
+                        start(key, value);
                     } else {
-                        start(key);
+                        stop(key);
                     }
                 }
+
 
 
             };
@@ -448,9 +451,9 @@ function stop(deviceID) {
     usersCapturing[deviceID] = false;
 }
 
-function start(deviceID) {
+function start(deviceID, typeOfLogs) {
     console.log(deviceID);
-    io.to(socketIDofUser[deviceID]).emit('start_Logging', " Start Capturing the Logs ");
+    io.to(socketIDofUser[deviceID]).emit('start_Logging', " Start Capturing the Logs :" + typeOfLogs);
     usersCapturing[deviceID] = true;
 }
 
@@ -542,7 +545,6 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', function() {
         console.log(' user has left ')
-
         socket.broadcast.emit("userdisconnect", socket.id + " user has left ")
         userConnected = false;
     });
