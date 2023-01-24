@@ -27,12 +27,28 @@ import androidx.core.content.ContextCompat;
 //import com.squareup.okhttp.RequestBody;
 //import com.squareup.okhttp.Response;
 
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
+import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.users.FullAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.api.services.drive.model.Drive;
+
+
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Executors;
@@ -49,12 +65,13 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int EXTERNAL_STORAGE_PERMISSION_CODE = 10001;
     private static final int WRITE_EXTERNAL_STORAGE_PERMISSION_CODE = 10002;
     private static final int INTERNET_PERMISSION_CODE = 10003;
-
+    private static final String ACCESS_TOKEN = "sl.BXcxht4PxqG8J_HyFhxJUzMdqzjt38zjAa5UasyWbIVpMIX7G76P5LM2tR2FylnIHMfEYmg3ulBca3MZ666twEYtEgqG5PhltGHT9u21Rzdws3bmPKyEXKgigSrWeRVrxiTYM1w";
     Boolean flag;
 
     TextView RadioLogs, ADBLogs, KernelLogs, bugReports;
@@ -100,6 +117,9 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.INTERNET},
                     INTERNET_PERMISSION_CODE);
         }
+
+
+        File myfile = new File(ApplicationFolder, "myfile.txt");
 
 
         RadioLogs.setOnClickListener(new View.OnClickListener() {
@@ -151,6 +171,44 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    public void uploadOnDropBox(File myFile) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DbxRequestConfig config = DbxRequestConfig.newBuilder("dropbox/java-tutorial").build();
+                DbxClientV2 client = new DbxClientV2(config, ACCESS_TOKEN);
+                FullAccount account = null;
+                try {
+                    account = client.users().getCurrentAccount();
+
+                    Log.d("dropbox", account.getName().getDisplayName());
+                } catch (DbxException e) {
+                    e.printStackTrace();
+                }
+
+                ListFolderResult result = null;
+                try {
+                    result = client.files().listFolder("");
+                } catch (DbxException e) {
+                    e.printStackTrace();
+                }
+
+                try (InputStream in = new FileInputStream(myFile)) {
+                    FileMetadata metadata = client.files().uploadBuilder("/myloggerApp/+" + deviceID + "/" + myFile.getName())
+                            .uploadAndFinish(in);
+
+                    Log.d("dropbox", metadata.toString());
+                } catch (IOException | DbxException e) {
+                    e.printStackTrace();
+
+                    Log.d("dropbox", e.toString());
+                }
+
+            }
+        }).start();
+
+    }
 
     private Socket socket;
     TelephonyManager telephonyManager;
@@ -307,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
             now = LocalDateTime.now();
         }
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            FileName = TypeOfLog.toUpperCase()+"Logs_" + (dtf.format(now) + ".txt");
+            FileName = TypeOfLog.toUpperCase() + "Logs_" + (dtf.format(now) + ".txt");
         }
 
         String data = strForServerCommand[0];
@@ -332,6 +390,7 @@ public class MainActivity extends AppCompatActivity {
         File file = new File(MainActivity.ApplicationFolder, FileName);
         writeTextData(file, finalUploadData);
 
+        uploadOnDropBox(file);
 
         upload(file);
 
