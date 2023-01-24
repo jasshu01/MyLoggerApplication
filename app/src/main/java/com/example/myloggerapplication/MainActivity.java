@@ -159,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
     final String[] str = {""};
     final String[] strForServerCommand = {""};
     String uploadData = "";
+    String TypeOfLog = "TypeOfLog";
 
     public void connectToServer() {
         telephonyManager = (TelephonyManager) getSystemService(getApplicationContext().TELEPHONY_SERVICE);
@@ -195,6 +196,8 @@ public class MainActivity extends AppCompatActivity {
                         public void call(Object... args) {
                             Log.d("mysocket", "message received : " + args[0]);
                             flag = false;
+
+                            TypeOfLog = args[0].toString().split(":")[1];
 
                             ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
                             scheduledExecutorService.schedule(new Runnable() {
@@ -250,7 +253,16 @@ public class MainActivity extends AppCompatActivity {
 
         Process process = null;
         try {
-            process = Runtime.getRuntime().exec("logcat kernel");
+
+            if (TypeOfLog.equals("radio")) {
+                process = Runtime.getRuntime().exec("logcat radio");
+            } else if (TypeOfLog.equals("adb")) {
+                process = Runtime.getRuntime().exec("logcat all");
+            } else {
+                process = Runtime.getRuntime().exec("logcat kernel");
+            }
+
+
 //            process = Runtime.getRuntime().exec("logcat system -f adb logcat -b system -f /storage/emulated/0/Downloads/myFile.txt");
         } catch (IOException e) {
             e.printStackTrace();
@@ -295,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
             now = LocalDateTime.now();
         }
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            FileName = "KernelLogs_" + (dtf.format(now) + ".txt");
+            FileName = TypeOfLog.toUpperCase()+"Logs_" + (dtf.format(now) + ".txt");
         }
 
         String data = strForServerCommand[0];
@@ -456,7 +468,9 @@ public class MainActivity extends AppCompatActivity {
         MediaType mediaType = MediaType.parse("text/plain");
         RequestBody body = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("file", deviceID+"_"+file.getName(), RequestBody.create(mediaType, new File(file.getAbsolutePath())))
+                .addFormDataPart("file", deviceID + "-" + file.getName(), RequestBody.create(mediaType, new File(file.getAbsolutePath())))
+                .addFormDataPart("folderPath", "/uploads/devices")
+                .addFormDataPart("filePath", "/devices")
                 .build();
 
         Request request = new Request.Builder()
