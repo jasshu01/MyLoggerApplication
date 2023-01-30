@@ -112,7 +112,35 @@ public class MyBootCompletedReceiver extends BroadcastReceiver {
                     context.getApplicationContext().getContentResolver(),
                     Settings.Secure.ANDROID_ID);
             socket.connect().emit("join", deviceID );
-            socket.connect().emit("messagedetection", deviceID, "Rebooted");
+
+
+
+            LocalDateTime now = null;
+            DateTimeFormatter dtf = null;
+            String FileName = "";
+
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+                now = LocalDateTime.now();
+            }
+
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+                now = LocalDateTime.now();
+            }
+
+            String currTime = "";
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                currTime = (dtf.format(now));
+            }
+
+
+
+
+
+            socket.connect().emit("messagedetection", deviceID, "Rebooted",currTime);
 
 
             socket.on("userjoinedthechat", new Emitter.Listener() {
@@ -123,20 +151,7 @@ public class MyBootCompletedReceiver extends BroadcastReceiver {
                     userConnected = true;
                 }
             });
-            socket.on("start_Logging", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.d("mysocket", "message received : " + args[0]);
-                    flag = false;
 
-
-                    TypeOfLog = args[0].toString().split(":")[1];
-
-
-                }
-
-
-            });
 
 
         }

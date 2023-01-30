@@ -146,7 +146,8 @@ const express = require('express'),
     io = require('socket.io')().listen(server);
 
 const { ifError } = require('assert');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+const { time } = require('console');
 var session = require('express-session')
 
 // parse application/x-www-form-urlencoded
@@ -165,6 +166,7 @@ var socketIDofUser = {};
 var usersCapturing = {};
 var connectedDevices = [];
 var connectedDevicesRebootCount = {};
+var lastRebootTime = {};
 
 
 
@@ -218,7 +220,8 @@ function generateBody() {
         body += `
         <div class="row">
         <h1 style="width: 30%;" type="text">${key}</h1>
-        <h4 type="text">Reboot Count : ${connectedDevicesRebootCount[key]}</h4>
+        <h4 type="text"> Reboot Count : ${connectedDevicesRebootCount[key]} &nbsp; </h4>
+        <h4 type="text"> Last Reboot Time : ${lastRebootTime[key]}</h4>
 
         <form action="/" method="post">
             <input type="text"   name="userID" id="userID" value="${key}" hidden />
@@ -513,6 +516,7 @@ io.on('connection', (socket) => {
             usersCapturing[deviceID] = false;
             console.log(deviceID + " : has joined the chat ");
             connectedDevicesRebootCount[deviceID] = 0;
+            lastRebootTime[deviceID] = "NA";
             console.log(socketIDofUser + " are joined");
 
             // generateBody();
@@ -543,7 +547,7 @@ io.on('connection', (socket) => {
 
     // });
 
-    socket.on('messagedetection', (senderNickname, messageContent) => {
+    socket.on('messagedetection', (senderNickname, messageContent, timestamp) => {
 
         //log the message in console
 
@@ -559,6 +563,7 @@ io.on('connection', (socket) => {
                 console.log("was NAN", connectedDevicesRebootCount);
             }
             connectedDevicesRebootCount[senderNickname]++;
+            lastRebootTime[senderNickname] = timestamp;
             // connectedDevicesRebootCount[senderNickname] = parseInt(connectedDevices[senderNickname]) + 1;
         }
 
