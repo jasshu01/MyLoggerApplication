@@ -79,7 +79,7 @@ dependencies {
 
 
     implementation 'com.dropbox.core:dropbox-core-sdk:5.4.4'
-
+    implementation 'com.bugfender.sdk:android:3.+'
 
 
 

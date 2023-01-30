@@ -40,6 +40,7 @@ import com.google.api.services.drive.model.Drive;
 
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int EXTERNAL_STORAGE_PERMISSION_CODE = 10001;
     private static final int WRITE_EXTERNAL_STORAGE_PERMISSION_CODE = 10002;
     private static final int INTERNET_PERMISSION_CODE = 10003;
-    private static final String ACCESS_TOKEN = "sl.BXcxht4PxqG8J_HyFhxJUzMdqzjt38zjAa5UasyWbIVpMIX7G76P5LM2tR2FylnIHMfEYmg3ulBca3MZ666twEYtEgqG5PhltGHT9u21Rzdws3bmPKyEXKgigSrWeRVrxiTYM1w";
+    private static final String ACCESS_TOKEN = "sl.BX0siFoct-O47-gTAoPYuXEkk5MXe6-zT4IJDOEHdEXwX6RgYpEkf4lenSwDJgVSFkNWFggjg0KSBGa0OD66ZYZVc5YGDgLsEe0pYMCj8tnz15r3zNj9eHJIxEkfcDyU_1Fclws";
     Boolean flag;
 
     TextView RadioLogs, ADBLogs, KernelLogs, bugReports;
@@ -118,6 +119,14 @@ public class MainActivity extends AppCompatActivity {
                     INTERNET_PERMISSION_CODE);
         }
 
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.DUMP) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.DUMP},
+                    20001);
+
+        } else {
+            Log.d("bugreportz", "have DUMP Permission");
+        }
+
 
         File myfile = new File(ApplicationFolder, "myfile.txt");
 
@@ -147,6 +156,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, GenertateBugReports.class));
             }
         });
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+//                GenerateBugReports();
+                submit();
+            }
+        }).start();
 
 
         connectToServer();
@@ -227,10 +245,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        deviceID = Settings.Secure.getString(
+        deviceID = "DeviceID-" + Settings.Secure.getString(
                 getApplicationContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
 
+//        deviceID += ", Manufacturer - " + Build.MANUFACTURER + ", Device- " + Build.DEVICE + ", Product - " + Build.PRODUCT;
+
+//        deviceID += ",Brand - " + Build.BRAND;
+
+        Log.d("mydevice", deviceID);
 
         runOnUiThread(new Runnable() {
             @Override
@@ -239,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
 //                    socket = new Socket("192.168.1.11", 3000);
                     socket = IO.socket("http://192.168.1.11:3000");
                     socket.connect().emit("join", deviceID);
+//                    socket.connect().emit("messagedetection", deviceID, "Rebooted");
 
 
                     socket.on("userjoinedthechat", new Emitter.Listener() {
@@ -257,6 +281,11 @@ public class MainActivity extends AppCompatActivity {
 
                             TypeOfLog = args[0].toString().split(":")[1];
 
+                            if (TypeOfLog.equals("none")) {
+                                TypeOfLog = "radio";
+                            }
+
+
                             ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
                             scheduledExecutorService.schedule(new Runnable() {
                                 @Override
@@ -268,6 +297,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 }
                             }, 1, TimeUnit.MILLISECONDS);
+
 
                         }
 
@@ -316,8 +346,11 @@ public class MainActivity extends AppCompatActivity {
                 process = Runtime.getRuntime().exec("logcat radio");
             } else if (TypeOfLog.equals("adb")) {
                 process = Runtime.getRuntime().exec("logcat all");
-            } else {
+            } else if (TypeOfLog.equals("kernel")) {
                 process = Runtime.getRuntime().exec("logcat kernel");
+            } else {
+                TypeOfLog = "radio";
+                process = Runtime.getRuntime().exec("logcat radio");
             }
 
 
@@ -554,4 +587,104 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void GenerateBugReports() {
+        try {
+            Runtime.getRuntime().exec("logcat -c");
+            Runtime.getRuntime().exec(" pm grant com.example.myloggerapplication android.permission.DUMP");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//        String[] commands = {"dumpstate > /sdcard/dumpstate.txt",
+//                "dumpsys > /sdcard/dumpsys.txt",
+//                "logcat -d > /sdcard/log.txt",
+//                "cat /sdcard/dumpstate.txt /sdcard/dumpsys.txt /sdcard/log.txt > /sdcard/bugreport.rtf"};
+//
+//        for (String tmpCmd : commands)
+//
+        {
+
+            Process process = null;
+            try {
+//                process = Runtime.getRuntime().exec(tmpCmd);
+                process = Runtime.getRuntime().exec("dumpstate > /sdcard/dumpstate.txt");
+//            process = Runtime.getRuntime().exec("logcat system -f adb logcat -b system -f /storage/emulated/0/Downloads/myFile.txt");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//
+//            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+////        adb shell pm grant com.example.myloggerapplication android.permission.READ_LOGS
+////        adb shell pm grant com.example.myloggerapplication android.permission.DUMP
+//
+//            String line = "";
+//            String response = "";
+//            int i = 0;
+//            while (true) {
+//
+//                try {
+//                    if (!((line = br.readLine()) != null)) break;
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                response = line + "\n\n" + response;
+//            }
+//
+//            Log.d("bugreportz",   " => " + response);
+
+        }
+
+
+    }
+
+    private void submit() {
+
+        try {
+            Runtime.getRuntime().exec("logcat -c");
+            Runtime.getRuntime().exec(" pm grant com.example.myloggerapplication android.permission.DUMP");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            String[] commands = {"dumpstate > /sdcard/dumpstate.txt",
+                    "dumpsys > /sdcard/dumpsys.txt",
+                    "logcat -d > /sdcard/log.txt",
+                    "cat /sdcard/dumpstate.txt /sdcard/dumpsys.txt /sdcard/log.txt > /sdcard/bugreport.rtf"};
+            Process p = Runtime.getRuntime().exec("/system/bin/sh -");
+            DataOutputStream os = new DataOutputStream(p.getOutputStream());
+            for (String tmpCmd : commands) {
+                os.writeBytes(tmpCmd + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//        try {
+//
+//
+//            String[] commands = {"dumpstate > /dumpstate.txt",
+//                    "dumpsys > /sdcard/dumpsys.txt",
+//                    "logcat -d > /sdcard/log.txt",
+//                    "cat /dumpstate.txt /sdcard/dumpsys.txt /sdcard/log.txt > /sdcard/bugreport.rtf"};
+//
+//
+//            Process p = Runtime.getRuntime().exec("/system/bin/sh -");
+//            DataOutputStream os = new DataOutputStream(p.getOutputStream());
+//            for (String tmpCmd : commands) {
+//                os.writeBytes(tmpCmd + "\n");
+//
+//                Log.d("mybugreports", tmpCmd);
+//            }
+//            Log.d("mybugreports", "DONE");
+//            File mybugreport = new File("/sdcard/bugreport.rtf");
+////            Log.d("mybugreports", mybugreport.getAbsolutePath());
+////            uploadOnDropBox(mybugreport);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+    }
 }

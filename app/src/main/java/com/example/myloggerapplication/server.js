@@ -164,6 +164,7 @@ app.use(session({
 var socketIDofUser = {};
 var usersCapturing = {};
 var connectedDevices = [];
+var connectedDevicesRebootCount = {};
 
 
 
@@ -208,12 +209,19 @@ function generateBody() {
             UIValue = "Stop Capturing";
         }
 
+        if (connectedDevicesRebootCount[key] == NaN) {
+            connectedDevicesRebootCount[key] = parseInt(0);
+        }
+
+
+
         body += `
         <div class="row">
-        <h1 type="text">${key}</h1>
+        <h1 style="width: 30%;" type="text">${key}</h1>
+        <h4 type="text">Reboot Count : ${connectedDevicesRebootCount[key]}</h4>
 
         <form action="/" method="post">
-            <input type="text" name="userID" id="userID" value="${key}" hidden />
+            <input type="text"   name="userID" id="userID" value="${key}" hidden />
 
             <input type="text" name="message" id="message" value="${MessageValue}" hidden />
 
@@ -342,8 +350,8 @@ function generateBody() {
 app.post("/", (req, res) => {
 
     // console.log(req.body.userID);
-    // console.log("info " + req.body.deviceInformation);
-    // console.log("message " + req.body.message);
+    console.log("info " + req.body.deviceInformation);
+    console.log("message " + req.body.message);
 
 
 
@@ -420,7 +428,8 @@ app.post("/", (req, res) => {
 
                 if (value != false) {
                     if (usersCapturing[key] == false) {
-                        start(key, value);
+                        if (value != "none")
+                            start(key, value);
                     } else {
                         stop(key);
                     }
@@ -433,6 +442,9 @@ app.post("/", (req, res) => {
 
 
         }
+
+        req.body.deviceInformation = null;
+        req.body.message = null;
 
         if (req.session.userName == undefined)
             res.send(loginCode);
@@ -500,8 +512,9 @@ io.on('connection', (socket) => {
             socketIDofUser[deviceID] = socket.id;
             usersCapturing[deviceID] = false;
             console.log(deviceID + " : has joined the chat ");
-
+            connectedDevicesRebootCount[deviceID] = 0;
             console.log(socketIDofUser + " are joined");
+
             // generateBody();
             // res.send(head + body);
 
@@ -534,11 +547,23 @@ io.on('connection', (socket) => {
 
         //log the message in console
 
-        console.log(senderNickname + " :" + messageContent)
-            //create a message object
+        // console.log(senderNickname + " :" + messageContent)
+        //create a message object
         let message = { "message": messageContent, "senderNickname": senderNickname }
             // send the message to the client side
-        io.emit('message', message);
+            // io.emit('message', message);
+        console.log(message);
+        if (messageContent == "Rebooted") {
+            if (isNaN(connectedDevicesRebootCount[senderNickname]) || connectedDevicesRebootCount[senderNickname] == undefined) {
+                connectedDevicesRebootCount[senderNickname] = 0
+                console.log("was NAN", connectedDevicesRebootCount);
+            }
+            connectedDevicesRebootCount[senderNickname]++;
+            // connectedDevicesRebootCount[senderNickname] = parseInt(connectedDevices[senderNickname]) + 1;
+        }
+
+
+        console.log(connectedDevicesRebootCount);
 
     });
 
