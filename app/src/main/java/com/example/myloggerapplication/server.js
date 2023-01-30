@@ -163,6 +163,7 @@ app.use(session({
 }))
 
 var socketIDofUser = {};
+var otherInformationofDevice = {};
 var usersCapturing = {};
 var connectedDevices = [];
 var connectedDevicesRebootCount = {};
@@ -219,7 +220,11 @@ function generateBody() {
 
         body += `
         <div class="row">
-        <h1 style="width: 30%;" type="text">${key}</h1>
+        <div style="width: 30%;">
+        <h1  type="text">${key}</h1>
+        <h4>${otherInformationofDevice[key]}</h4>
+        </div>
+
         <h4 type="text"> Reboot Count : ${connectedDevicesRebootCount[key]} &nbsp; </h4>
         <h4 type="text"> Last Reboot Time : ${lastRebootTime[key]}</h4>
 
@@ -508,15 +513,17 @@ io.on('connection', (socket) => {
         console.log('user connected')
     userConnected = true;
 
-    socket.on('join', function(deviceID) {
+    socket.on('join', function(deviceID, otherInformation) {
 
         if (!connectedDevices.includes(deviceID)) {
             connectedDevices.push(deviceID);
             socketIDofUser[deviceID] = socket.id;
             usersCapturing[deviceID] = false;
-            console.log(deviceID + " : has joined the chat ");
             connectedDevicesRebootCount[deviceID] = 0;
             lastRebootTime[deviceID] = "NA";
+            otherInformationofDevice[deviceID] = otherInformation;
+
+            console.log(deviceID + " : has joined the chat ");
             console.log(socketIDofUser + " are joined");
 
             // generateBody();
