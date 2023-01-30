@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "logical-essence-375611",
+  "private_key_id": "921d1eaa1577673ebedb8bafb7ce7eee8a9d0cfc",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCqskc1Xqx/6Z1S\noYd3nIuGoAqBbHB7Se2qTvWjtM5EHAMwenJPAPOWpdEKoxg4QBsqXtgzuCPsfBAM\n00Z9JhHY8wy0OpWewvTT8Z5kFNxNoVFzGbkEAsr6rLr4lfIUDHizT89lW59MwanT\nR14ih1hU7DE/CRlxhhzcYxetnTmg5ZdiX50EDFW9SBrKYMpZFWFNztyolIiYzSkn\nv8ihe8V0qQxOIY15cnwTzY9/OUVKf5NOBMeHqemG7bDonxP8nkJy03VuqXh5jhoz\nYEuvT62CZfZnti5TWeYsBNwcUpF/XhW+ZeGie1ssnutLZWAU+2dm7QgxQfS67/AS\noSO78KYxAgMBAAECggEABFTtHe96vu2/pG/NM2W9fDN+RMHK2nQaNAjYLrj5RYz0\n70NiOHtIkzV+yC9yn0XQMqtwvuJAxiDxWtP3PViMmiXz1/SHJL3jjufaKkXFv/IU\nsjAwS+fivQkKXyHWAHh/DSTcuWCheqYNAFu2qbdn0FLknooFc2YxAA5DNPCRHHJA\nbxTI8DVwMTQA0E1+0xu5D/1DG959EvOBO36VDo0/1I3DvOFArDaDYYYpPJWy+FB6\nN8B/KIFMR3k1evqlKKcz7ezNvZh5d54oZubBbSBqZGAj7+iXMJ0bn6vDi337GzaN\n7XeP/Wh2gUsth2xeprSZmSFoRRtAQMnwtwmVOlh1SQKBgQDqR8H3RxOcc8ZM3LVK\n1k6zm9agaLvuUu8SSCgQ39VJNqdWqH/WNJDvZO6NNY3HV4IIOVrAFf/HUWcxExUr\neuBWUwiu/14cv2jH4vvINVTgDTTR+AnZ2+CaVeTJS8Svpkuur+2hgbmLdwxu72n9\nWnFkhe4w2wimc9Vy9fxVPsYpWQKBgQC6hXca28G6tVxSEPLXypNk/Vz8GW0hvO/v\nlWi5QX9UO3PISdW8MzVjCkJFYaJ6lHfQbZTvhv1/xjMPCMvdL4v/sRUndnoB/h+z\nPZHt6nx7t1ZOWsX2gFE4KvTYL8/YFQpMu0/os7AQvhFZWDUFF0et/bilgDRJSclj\nRlnDyGNwmQKBgQDAn5c/NNVPAXG9qIn2qhWzXyIsaXB7Fv0xztoCZcb7l1Am1Aun\nlzjDW/03ZRzZFX34PQ/8dxoCS0/I7aOuSC1DTKoLGDPM9yOzlVDm39KVFMalDIcs\n9LfKrWyahQ2GTfhT/Joo/HwNyygR3g8LG923hNa+nJiUIxEQoGeDv0U2oQKBgQCV\n4Z/nBkYzuX7ZN2NdAhzVHz90GR536PJJbJ89lqMx1aBhhutokyHIVzsPs7gzllB9\nPUFcBPZ5kZP/9cqUD5wJOIxOLMc4CLQCfWxhaXbkl1uUFR9UyKH7Z5Fek3UKJ0Yi\niLZawOGvYnxgdiAM2jswVlzlKRNa/R8GVkbVq5Y0qQKBgAvrWZEIAhlxysdSbGuN\nlQwK9ps5SwgG8CAQMnV0hyUWxX3EsPaPPwEaJ1iGFIEmFgFa4kiAZIfbXlz8x4V7\nPjEZmiN86KwkRsbZLrBRPrWTL9SxKa8HdN5KRHRiIO30P0z+J8annMX1/20cJLPz\n10fmtlhaV9mqvJuUryfPUB2e\n-----END PRIVATE KEY-----\n",
+  "client_email": "jasshuandroidstudio@logical-essence-375611.iam.gserviceaccount.com",
+  "client_id": "106110187492283254031",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/jasshuandroidstudio%40logical-essence-375611.iam.gserviceaccount.com"
+}
