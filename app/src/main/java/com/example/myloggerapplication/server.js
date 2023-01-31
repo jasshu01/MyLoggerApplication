@@ -164,12 +164,28 @@ app.use(session({
 
 var socketIDofUser = {};
 var otherInformationofDevice = {};
+var detailedInformation = {};
 var usersCapturing = {};
 var connectedDevices = [];
 var connectedDevicesRebootCount = {};
 var lastRebootTime = {};
 
 
+function extractOtherInformation(deviceID, otherInformation) {
+    var myinformation = {};
+
+    information = otherInformation.split(",");
+
+
+    information.forEach(element => {
+        mykey = element.split("-")[0];
+        myvalue = element.split("-")[1];
+        myinformation[mykey] = myvalue;
+    });
+
+    detailedInformation[deviceID] = myinformation;
+
+}
 
 
 
@@ -221,8 +237,11 @@ function generateBody() {
         body += `
         <div class="row">
         <div style="width: 30%;">
-        <h1  type="text">${key}</h1>
-        <h4>${otherInformationofDevice[key]}</h4>
+        <form action="/deviceinformation" method="POST">
+        <input type="submit" style="font-size:30px" name="deviceID" value="${key}"></input>
+        </form>
+
+
         </div>
 
         <h4 type="text"> Reboot Count : ${connectedDevicesRebootCount[key]} &nbsp; </h4>
@@ -353,7 +372,16 @@ function generateBody() {
     </body></html>`;
 }
 
+app.post("/deviceinformation", (req, res) => {
 
+    if (req.body.deviceID != undefined) {
+        res.send(generateDeviceDisplayInformation(req.body.deviceID));
+        return;
+    } else {
+        res.send(loginCode);
+        return;
+    }
+});
 
 app.post("/", (req, res) => {
 
@@ -523,6 +551,8 @@ io.on('connection', (socket) => {
             lastRebootTime[deviceID] = "NA";
             otherInformationofDevice[deviceID] = otherInformation;
 
+            extractOtherInformation(deviceID, otherInformation);
+
             console.log(deviceID + " : has joined the chat ");
             console.log(socketIDofUser + " are joined");
 
@@ -590,6 +620,38 @@ io.on('connection', (socket) => {
 
 });
 
+
+function generateDeviceDisplayInformation(deviceID) {
+
+    var deviceDisplayInformation = `<!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>  <body>
+    <h2> ${deviceID}</h2>
+    `
+
+    for (const [key, value] of Object.entries(detailedInformation[deviceID])) {
+
+        deviceDisplayInformation += `
+
+
+        <h2>${key} : ${value}</h2>
+
+   `
+    }
+
+    deviceDisplayInformation += ` </body>
+
+    </html>`;
+
+    return deviceDisplayInformation;
+
+}
 
 
 

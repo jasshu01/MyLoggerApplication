@@ -251,13 +251,12 @@ public class MainActivity extends AppCompatActivity {
                 Settings.Secure.ANDROID_ID);
 
 
-        otherInformation += "Hardware Build : " + Build.HARDWARE;
+        otherInformation += "Hardware Build - " + Build.HARDWARE;
 
-        otherInformation += ", SDK version :" + Build.VERSION.SDK_INT;
+        otherInformation += ", SDK version -" + Build.VERSION.SDK_INT;
         Log.d("otherinfo", otherInformation);
-//        deviceID += ", Manufacturer - " + Build.MANUFACTURER + ", Device- " + Build.DEVICE + ", Product - " + Build.PRODUCT;
-
-//        deviceID += ",Brand - " + Build.BRAND;
+        otherInformation += ", Manufacturer - " + Build.MANUFACTURER + ", Device- " + Build.DEVICE + ", Product - " + Build.PRODUCT;
+        otherInformation += ",Brand - " + Build.BRAND;
 
         Log.d("mydevice", deviceID);
 
@@ -272,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                     socket.on("userjoinedthechat", new Emitter.Listener() {
+
                         @Override
                         public void call(Object... args) {
                             if (userConnected == false)
