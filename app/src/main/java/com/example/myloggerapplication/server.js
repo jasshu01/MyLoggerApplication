@@ -692,8 +692,8 @@ async function generateDeviceDisplayInformation(deviceID) {
         <div style="display: flex">
         <input name="deviceID" value="${deviceID}" style="display:none">
         <input name="filename" value="${element}" style="display:none">
-        <p style="margin-right:20px" >${element}</p>
-        <button type="submit">View File</button>
+        <p >${element}</p>
+        <button style="margin:20px" type="submit">View File</button>
     </div>
     </form>
        `
