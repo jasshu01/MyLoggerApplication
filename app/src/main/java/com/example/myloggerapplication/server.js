@@ -149,6 +149,7 @@ const { ifError } = require('assert');
 var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
+const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -372,10 +373,10 @@ function generateBody() {
     </body></html>`;
 }
 
-app.post("/deviceinformation", (req, res) => {
+app.post("/deviceinformation", async(req, res) => {
 
     if (req.body.deviceID != undefined) {
-        res.send(generateDeviceDisplayInformation(req.body.deviceID));
+        res.send(await generateDeviceDisplayInformation(req.body.deviceID));
         return;
     } else {
         res.send(loginCode);
@@ -621,7 +622,7 @@ io.on('connection', (socket) => {
 });
 
 
-function generateDeviceDisplayInformation(deviceID) {
+async function generateDeviceDisplayInformation(deviceID) {
 
     var deviceDisplayInformation = `<!DOCTYPE html>
     <html lang="en">
@@ -632,7 +633,7 @@ function generateDeviceDisplayInformation(deviceID) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Document</title>
     </head>  <body>
-    <h2> ${deviceID}</h2>
+    <h1> ${deviceID}</h1>
     `
 
     for (const [key, value] of Object.entries(detailedInformation[deviceID])) {
@@ -640,10 +641,24 @@ function generateDeviceDisplayInformation(deviceID) {
         deviceDisplayInformation += `
 
 
-        <h2>${key} : ${value}</h2>
+        <h3>${key} : ${value}</h3>
 
    `
     }
+
+    filenames = await getMyFiles(deviceID);
+    console.log("filenames", filenames.length);
+
+    deviceDisplayInformation += "<h1> Captured Logs <h4>"
+    filenames.forEach(element => {
+        console.log("filename", element);
+        deviceDisplayInformation += `
+
+
+            <p>${element}</p>
+
+       `
+    });
 
     deviceDisplayInformation += ` </body>
 
@@ -652,6 +667,39 @@ function generateDeviceDisplayInformation(deviceID) {
     return deviceDisplayInformation;
 
 }
+
+var ACCESS_TOKEN = "sl.BX6s1bOGv-QJ2gYHgyWjCq7UkneGgHib6jxzbO5IciSHUvTfNC7wniw_Fq1r5NsReHy4Ju7_SCzszB02dDGkYmAFAExUaTfyUGrq-5ebAaFiJ1WReZ-gNtvqv1x_kIRxqr-tLSU";
+var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
+// getMyFiles("DeviceID-0af5e7d3e94b56b8");
+
+async function getMyFiles(deviceID) {
+    var fileNames = [];
+
+    await dbx.filesListFolder({
+            path: `/myloggerApp/+${deviceID}`
+                // path: `/myloggerApp`
+        })
+        .then(function(response) {
+            console.log('response', response)
+
+            var files = response.result.entries;
+            for (var i = 0; i < files.length; i++) {
+
+                fileNames.push(files[i].name);
+                console.log(files[i].name);
+
+
+            }
+
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
+
+    console.log(fileNames);
+    return fileNames;
+}
+
 
 
 
