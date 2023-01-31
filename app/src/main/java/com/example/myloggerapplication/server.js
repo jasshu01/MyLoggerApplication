@@ -150,6 +150,9 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
+var ACCESS_TOKEN = "sl.BX7OjslNZY8D_GeugbdhKRGV0ZKxYZ4KMEa0m-zHdQKd7bQX43vuWUtqNOBuOQsHNErGKJDGy40TQ1HfxPLKUYIeYI1XpXBhm58claWcbr6szoFy6Kf-EP5kxt8oY6xo5LqWp2k";
+var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
+const FileSaver = require("file-saver");
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -382,6 +385,37 @@ app.post("/deviceinformation", async(req, res) => {
         res.send(loginCode);
         return;
     }
+});
+app.post("/viewfile", async(req, res) => {
+
+    // if (req.body.deviceID != undefined) {
+
+    console.log(req.body.deviceID, req.body.filename);
+    // var filedata = await downloadFileFromDropBox(req.body.deviceID, req.body.filename);
+    // console.log(filedata);
+    // res.send(filedata);
+    // return;
+    // } else {
+    //     res.send(loginCode);
+    //     return;
+    // }
+
+
+    await dbx.filesDownload({ path: `/myloggerApp/+${req.body.deviceID}/${req.body.filename}` })
+        .then(function(response) {
+
+            res.send(response.result.fileBinary.toString("utf8"));
+            return;
+            // file = response.result.fileBinary.toString("utf8");
+            // console.log(response.result.fileBinary.toString("utf8"));
+        })
+        .catch(function(error) {
+            res.send(error);
+            console.error(error);
+        });
+
+
+
 });
 
 app.post("/", (req, res) => {
@@ -649,18 +683,27 @@ async function generateDeviceDisplayInformation(deviceID) {
     filenames = await getMyFiles(deviceID);
     console.log("filenames", filenames.length);
 
-    deviceDisplayInformation += "<h1> Captured Logs <h4>"
+    deviceDisplayInformation += `<h1> Captured Logs <h4> `
+
     filenames.forEach(element => {
         console.log("filename", element);
         deviceDisplayInformation += `
-
-
-            <p>${element}</p>
-
+        <form action="/viewfile" method="POST" >
+        <div style="display: flex">
+        <input name="deviceID" value="${deviceID}" style="display:none">
+        <input name="filename" value="${element}" style="display:none">
+        <p style="margin-right:20px" >${element}</p>
+        <button type="submit">View File</button>
+    </div>
+    </form>
        `
     });
 
-    deviceDisplayInformation += ` </body>
+    deviceDisplayInformation += `
+
+
+
+    </body>
 
     </html>`;
 
@@ -668,8 +711,7 @@ async function generateDeviceDisplayInformation(deviceID) {
 
 }
 
-var ACCESS_TOKEN = "sl.BX6s1bOGv-QJ2gYHgyWjCq7UkneGgHib6jxzbO5IciSHUvTfNC7wniw_Fq1r5NsReHy4Ju7_SCzszB02dDGkYmAFAExUaTfyUGrq-5ebAaFiJ1WReZ-gNtvqv1x_kIRxqr-tLSU";
-var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
+
 // getMyFiles("DeviceID-0af5e7d3e94b56b8");
 
 async function getMyFiles(deviceID) {
@@ -686,7 +728,7 @@ async function getMyFiles(deviceID) {
             for (var i = 0; i < files.length; i++) {
 
                 fileNames.push(files[i].name);
-                console.log(files[i].name);
+                console.log(files[i]);
 
 
             }
@@ -699,6 +741,31 @@ async function getMyFiles(deviceID) {
     console.log(fileNames);
     return fileNames;
 }
+
+downloadFileFromDropBox("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_31_01_29_04.txt");
+
+
+
+// var file = dbx.filesDownload({ path: '/myloggerApp/+DeviceID-0af5e7d3e94b56b8/RADIOLogs_2023_01_31_01_29_04.txt' })
+async function downloadFileFromDropBox(deviceID, fileName) {
+    var file = "";
+
+    dbx.filesDownload({ path: `/myloggerApp/+${deviceID}/${fileName}` })
+        .then(function(response) {
+
+            file = response.result.fileBinary.toString("utf8");
+            console.log(response.result.fileBinary.toString("utf8"));
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
+
+    console.log("-------------", file);
+    return file;
+}
+
+
+
 
 
 
