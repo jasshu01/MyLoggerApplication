@@ -257,8 +257,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d("otherinfo", otherInformation);
         otherInformation += ", Manufacturer - " + Build.MANUFACTURER + ", Device- " + Build.DEVICE + ", Product - " + Build.PRODUCT;
         otherInformation += ",Brand - " + Build.BRAND;
+        otherInformation += ",Build Version - " + Build.VERSION.RELEASE;
 
         Log.d("mydevice", deviceID);
+        Log.d("otherinfor", otherInformation);
 
         runOnUiThread(new Runnable() {
             @Override
