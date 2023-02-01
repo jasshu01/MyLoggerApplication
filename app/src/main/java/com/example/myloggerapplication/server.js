@@ -150,7 +150,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BX8xB94SAc-88Bc9_xghCXVLThj6ZDCkg_I6nEHdLo69b10lBGD_xycKaCekUG34-K_cYv5PgUqGdDzr0zcA7kyZOw69VzltVvIiE_AhebeE7uLh2eKXWP8eCimfdArT54FnMvoU";
+var ACCESS_TOKEN = "sl.BYDHV9CJ7mJhLnAsn7Bj1mT9WXFizo8GXtevogpmobz00fZXLgu_ova2S9gR6OUzTy5YT8FhK6eEYQbhfYzzJZ19z_KEA-mPjPxmBmeO9O64MiOHnu56_otQIZtZsGNgAod-UoTz";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -903,7 +903,7 @@ async function getSharedLink() {
     const { spawn } = require('child_process');
 
     const data = JSON.stringify({
-        "path": "/myloggerApp/+DeviceID-0af5e7d3e94b56b8/RADIOLogs_2023_01_30_14_21_21.txt",
+        "path": "/myloggerApp/+DeviceID-0af5e7d3e94b56b8/ADBLogs_2023_01_30_14_41_20.txt",
         "settings": ({
             "access": "viewer",
             "allow_download": true,
@@ -914,22 +914,41 @@ async function getSharedLink() {
     const curl = spawn('curl', ['-X', 'POST', 'https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', '-H', `Authorization: Bearer ${ACCESS_TOKEN}`, '-H', 'Content-Type: application/json', '-d', data]);
 
     curl.stdout.on('data', (data) => {
-        console.log(`
-                stdout: ${data}
-                `);
+        console.log(`stdout: ${data}`);
+
+        var myJSONResponse = JSON.parse(data);
+
+        console.log(`stdout: ${myJSONResponse['url']}`);
+        console.log(`stdout: ${myJSONResponse["url"]}`);
     });
 
-    curl.stderr.on('data', (data) => {
-        console.error(`
-                stderr: ${data}
-                `);
-    });
+    // curl.stderr.on('data', (data) => {
+    //     console.error(`
+    //             stderr: ${data}
+    //             `);
+    // });
 
-    curl.on('close', (code) => {
-        console.log(`
-                child process exited with code ${code}
-                `);
-    });
+    // curl.on('close', (code) => {
+    //     console.log(`
+    //             child process exited with code ${code}
+    //             `);
+    // });
+
+
+
+    dbx.sharingListSharedLinks({ path: '/myloggerApp/+DeviceID-0af5e7d3e94b56b8/KERNELLogs_2023_01_30_14_29_37.txt' })
+        .then(function(response) {
+
+            console.log(response.result.links[0].url);
+            // Filter the list of shared links to find the one for the file you want
+            // const sharedLink = response.links.find(link => link.path_lower === '/path/to/file');
+
+            // Use or delete the shared link as needed
+            // console.log(sharedLink.url);
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
 
 }
 
