@@ -150,7 +150,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BYDHV9CJ7mJhLnAsn7Bj1mT9WXFizo8GXtevogpmobz00fZXLgu_ova2S9gR6OUzTy5YT8FhK6eEYQbhfYzzJZ19z_KEA-mPjPxmBmeO9O64MiOHnu56_otQIZtZsGNgAod-UoTz";
+var ACCESS_TOKEN = "sl.BYBh-OPTgfKbhoa3MGDhme7kokX4pZjCWs8UeIdwPHjMBdnLWxYm9nxjG36OwgSpgYYp_EeB6oG6KjyXGPOYRoWOyBV4yZKll4aRsv8UzTcTZbSkBAaJbCSUwaKyNB_Mt6_sVVPk";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -813,97 +813,17 @@ async function downloadFileFromDropBox(deviceID, fileName) {
 }
 
 
-//curl -X POST https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings  --header "Authorization": "Bearer sl.BX-Lf26_KVUTOsufYbmSGUt7ZTFdTLNv25OnLEW2VNHqx5wAPyIE84_C5BuvpbqK2GYxujWa9k7YU361wadYRsGHwBmK-smONLykkoSw_3MFbmbfO2YPwkYpDw6l2WW4YIFz9hg" --header "Content-Type: application/json" --data "{"path":"/myloggerApp/+DeviceID-0af5e7d3e94b56b8/RADIOLogs_2023_01_31_01_29_04.txt","settings":{"access":"viewer","allow_download":true,"audience":"public","requested_visibility":"public"}}"
 
-// const fetch = require('node-fetch');
-// Replace FILE_PATH with the path to the file in your Dropbox
 const FILE_PATH = "/myloggerApp/+DeviceID-0af5e7d3e94b56b8/RADIOLogs_2023_01_31_01_29_04.txt";
 
-async function getSharedLink() {
+async function getSharedLink(deviceID, filename) {
 
+    var myFileLink = "";
     const url = `https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings`;
-
-    // const response = await fetch(url, {
-    //     method: "POST",
-    //     headers: {
-    //         "Authorization": `Bearer ${ACCESS_TOKEN}`,
-    //         "Content-Type": "application/json"
-    //     },
-    //     data: ({
-    //             "path": "/myloggerApp/+DeviceID-0af5e7d3e94b56b8/ADBLogs_2023_01_30_14_15_05.txt",
-    //             "settings": {
-    //                 "access": "viewer",
-    //                 "allow_download": true,
-    //                 "audience": "public",
-    //                 "requested_visibility": "public"
-    //             }
-    //         })
-    //         // "data": `"path": "/myloggerApp/+DeviceID-0af5e7d3e94b56b8/RADIOLogs_2023_01_31_01_29_04.txt", "settings": {"access": "viewer", "allow_download": true, "audience": "public", "requested_visibility": "public" }`
-
-
-    // })
-
-
-    const filePath = encodeURIComponent('/myloggerApp/+DeviceID-0af5e7d3e94b56b8/ADBLogs_2023_01_30_14_15_05.txt');
-
-    // fetch(`https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings`, {
-    //         method: 'POST',
-    //         headers: {
-    //             'Authorization': `Bearer ${ACCESS_TOKEN}`,
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({ path: filePath, settings: { requested_visibility: "public" } })
-    //     })
-    //     .then(res => res.json())
-    //     .then(data => {
-    //         console.log(data);
-    //     })
-    //     .catch(error => {
-    //         console.error(error);
-    //     });
-    // fetch(`https://content.dropboxapi.com/2/sharing/create_shared_link_with_settings?path=${filePath}`, {
-    //         headers: {
-    //             'Authorization': `Bearer ${accessToken}`,
-    //             'Dropbox-API-Arg': JSON.stringify({ path: filePath })
-    //         }
-    //     })
-    //     .then(res => res.arrayBuffer())
-    //     .then(data => {
-    //         // do something with the file data
-    //         console.log(data);
-    //     })
-    //     .catch(error => {
-    //         console.error(error);
-    //     });
-
-    // "data": "\"path\": \"/myloggerApp/+DeviceID-0af5e7d3e94b56b8/RADIOLogs_2023_01_31_01_29_04.txt\", \"settings\": {\"access\": \"viewer\", \"allow_download\": true, \"audience\": \"public\", \"requested_visibility\": \"public\" }"
-    // const response = await fetch(url, {
-    //     method: "POST",
-    //     headers: {
-    //         "Authorization": `Bearer ${ACCESS_TOKEN}`,
-    //         "Content-Type": "application/json"
-    //     },
-    //     "body": JSON.stringify({
-    //         "path": "/myloggerApp/+DeviceID-0af5e7d3e94b56b8/ADBLogs_2023_01_30_14_15_05.txt",
-    //         "settings": JSON.stringify({
-    //             "access": "viewer",
-    //             "allow_download ": true,
-    //             "audience": "public",
-    //             "requested_visibility": "public"
-    //         })
-    //     })
-
-    // })
-
-    // // const data = await response.json();
-    // await console.log("data", response);
-    // return data.url;
-
-
+    const filePath = `/myloggerApp/+${deviceID}/${filename}`;
     const { spawn } = require('child_process');
-
     const data = JSON.stringify({
-        "path": "/myloggerApp/+DeviceID-0af5e7d3e94b56b8/ADBLogs_2023_01_30_14_41_20.txt",
+        "path": filePath,
         "settings": ({
             "access": "viewer",
             "allow_download": true,
@@ -911,50 +831,42 @@ async function getSharedLink() {
             "requested_visibility": "public"
         })
     })
-    const curl = spawn('curl', ['-X', 'POST', 'https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', '-H', `Authorization: Bearer ${ACCESS_TOKEN}`, '-H', 'Content-Type: application/json', '-d', data]);
+    const curl = spawn('curl', ['-X', 'POST', url, '-H', `Authorization: Bearer ${ACCESS_TOKEN}`, '-H', 'Content-Type: application/json', '-d', data]);
 
-    curl.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
+    await curl.stdout.on('data', (data) => {
+        // console.log(`stdout: ${data}`);
 
         var myJSONResponse = JSON.parse(data);
 
-        console.log(`stdout: ${myJSONResponse['url']}`);
+
+        // console.log(`stdout: ${myJSONResponse['url']}`);
         console.log(`stdout: ${myJSONResponse["url"]}`);
+
+        myFileLink = myJSONResponse["url"];
+
+        if (myFileLink != undefined)
+            return myFileLink;
+
+
     });
 
-    // curl.stderr.on('data', (data) => {
-    //     console.error(`
-    //             stderr: ${data}
-    //             `);
-    // });
-
-    // curl.on('close', (code) => {
-    //     console.log(`
-    //             child process exited with code ${code}
-    //             `);
-    // });
-
-
-
-    dbx.sharingListSharedLinks({ path: '/myloggerApp/+DeviceID-0af5e7d3e94b56b8/KERNELLogs_2023_01_30_14_29_37.txt' })
+    await dbx.sharingListSharedLinks({ path: filePath })
         .then(function(response) {
-
             console.log(response.result.links[0].url);
-            // Filter the list of shared links to find the one for the file you want
-            // const sharedLink = response.links.find(link => link.path_lower === '/path/to/file');
-
-            // Use or delete the shared link as needed
-            // console.log(sharedLink.url);
+            myFileLink = response.result.links[0].url;
         })
         .catch(function(error) {
             console.error(error);
         });
 
+
+    return myFileLink;
+
+
 }
 
-getSharedLink();
-// .then(console.log).catch(console.error);
-
+console.log(
+    getSharedLink("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_30_14_28_31.txt"));
 
 
 server.listen(3000, () => {
