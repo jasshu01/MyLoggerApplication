@@ -150,7 +150,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BX7OjslNZY8D_GeugbdhKRGV0ZKxYZ4KMEa0m-zHdQKd7bQX43vuWUtqNOBuOQsHNErGKJDGy40TQ1HfxPLKUYIeYI1XpXBhm58claWcbr6szoFy6Kf-EP5kxt8oY6xo5LqWp2k";
+var ACCESS_TOKEN = "sl.BX_HMFNkFd2R60THj1SoLIcV4FZm9xJBXdOpcWkiW_y8h2iMqVmBarTSIj03wYHtRT0A8PgHm7A-HVU20tndYDK2iXulv8PgRR3RvGlVrDjXgP7C8MnYabPjRFi3qwTyiM6X2nM";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -401,10 +401,58 @@ app.post("/viewfile", async(req, res) => {
     // }
 
 
+
+
     await dbx.filesDownload({ path: `/myloggerApp/+${req.body.deviceID}/${req.body.filename}` })
         .then(function(response) {
 
-            res.send(response.result.fileBinary.toString("utf8"));
+            var myViewFileHTML = `
+
+            <!DOCTYPE html>
+        <html lang="en">
+
+        <head>
+            <meta charset="UTF-8" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Document</title>
+        </head>
+
+        <body>
+            <button onclick="downloadFile()">Download Log File</button>
+            <p id="filename">${req.body.filename}</p>
+            <p id="logfiledata">${response.result.fileBinary.toString("utf8")}</p>
+        </body>
+        <script>
+            function downloadFile() {
+                saveData(document.getElementById("logfiledata").innerHTML, document.getElementById("filename").innerHTML);
+            }
+            var saveData = (function() {
+                var a = document.createElement("a");
+                document.body.appendChild(a);
+                a.style = "display: none";
+                return function(data, fileName) {
+                    (blob = new Blob([data], {
+                        type: "octet/stream",
+                    })),
+                    (url = window.URL.createObjectURL(blob));
+                    a.href = url;
+                    a.download = fileName;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                };
+            })();
+
+            var data = "my data",
+                fileName = "my-download.txt";
+
+            // saveData(data, fileName);
+        </script>
+
+        </html>
+            `
+            res.send(myViewFileHTML);
+            // res.send(response.result.fileBinary.toString("utf8"));
             return;
             // file = response.result.fileBinary.toString("utf8");
             // console.log(response.result.fileBinary.toString("utf8"));
@@ -742,7 +790,7 @@ async function getMyFiles(deviceID) {
     return fileNames;
 }
 
-downloadFileFromDropBox("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_31_01_29_04.txt");
+// downloadFileFromDropBox("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_31_01_29_04.txt");
 
 
 

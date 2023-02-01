@@ -72,8 +72,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int EXTERNAL_STORAGE_PERMISSION_CODE = 10001;
     private static final int WRITE_EXTERNAL_STORAGE_PERMISSION_CODE = 10002;
     private static final int INTERNET_PERMISSION_CODE = 10003;
-    private static final String ACCESS_TOKEN = "sl.BX6s1bOGv-QJ2gYHgyWjCq7UkneGgHib6jxzbO5IciSHUvTfNC7wniw_Fq1r5NsReHy4Ju7_SCzszB02dDGkYmAFAExUaTfyUGrq-5ebAaFiJ1WReZ-gNtvqv1x_kIRxqr-tLSU";
+    private static final String ACCESS_TOKEN = "sl.BX_HMFNkFd2R60THj1SoLIcV4FZm9xJBXdOpcWkiW_y8h2iMqVmBarTSIj03wYHtRT0A8PgHm7A-HVU20tndYDK2iXulv8PgRR3RvGlVrDjXgP7C8MnYabPjRFi3qwTyiM6X2nM";
     Boolean flag;
+
+
 
     TextView RadioLogs, ADBLogs, KernelLogs, bugReports;
     static File ApplicationFolder, RadioLogsFolder, ADBLogsFolder, KernelLogsFolder, BugReportsFolder;
@@ -267,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 try {
 //                    socket = new Socket("192.168.1.11", 3000);
-                    socket = IO.socket("http://192.168.1.11:3000");
+                    socket = IO.socket("http://192.168.1.8:3000");
                     socket.connect().emit("join", deviceID, otherInformation);
 //                    socket.connect().emit("messagedetection", deviceID, "Rebooted");
 
