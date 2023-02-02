@@ -124,8 +124,6 @@ var head = `<!DOCTYPE html>
 
 
 `;
-
-
 var body = ``;
 
 
@@ -138,11 +136,7 @@ var validCredentials = [{
 
 }]
 
-
-
-
-
-
+// REQUIREMENTS
 const express = require('express'),
     http = require('http'),
     app = express(),
@@ -155,7 +149,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BYDCx4ygfJU5stkvHxr8zaxRiBTnIX2w47ftOaIKU0IdFverVO-biR_T--zoAgF8M9KT93jC71J_39-SWmQVLfbrcAEft-qwblW_EL9UCNBaGvNNKYhc5sk-GuYdAwz5yqHzy7_Y";
+var ACCESS_TOKEN = "sl.BYCODKzMslcRKK-XbS4FcSsZcI0EYdm_LGQC3evN2__tsLr89H8JFcO-6twshGpe525eq1ZWDgC3_u0Ge0sLUNkHz4ESOe0aJvUp9QCqA-DgRkZNr_BrYpmcZ";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -173,7 +167,7 @@ var transporter = nodemailer.createTransport({
 
 
 
-// parse application/json
+
 app.use(bodyParser.json())
 app.use(session({
     secret: 'MacChromeBrowser',
@@ -182,6 +176,8 @@ app.use(session({
     cookie: { secure: false }
 }))
 
+
+// ARRAYS/OBJECTS USED
 var socketIDofUser = {};
 var otherInformationofDevice = {};
 var detailedInformation = {};
@@ -191,6 +187,8 @@ var connectedDevicesRebootCount = {};
 var lastRebootTime = {};
 
 
+
+// EXTRACT INFORMATION RECEIVED FROM DEVICE
 function extractOtherInformation(deviceID, otherInformation) {
     var myinformation = {};
 
@@ -209,6 +207,7 @@ function extractOtherInformation(deviceID, otherInformation) {
 
 
 
+// DATABASE CONNECTION
 var mongoose = require("mongoose");
 var DB = `mongodb+srv://jasshugarg:Yashu1801@pizzaclub.4rjeu.mongodb.net/PizzaClub?retryWrites=true&w=majority`;
 // mongoose.set('strictQuery', true)
@@ -227,7 +226,7 @@ const Owner = mongoose.model('Owner', ownerSchema);
 
 
 
-
+// GENERATE HOMEPAGE BODY HTML
 function generateBody() {
 
     body = `
@@ -400,6 +399,9 @@ function generateBody() {
     </body></html>`;
 }
 
+
+
+// POST REQUESTS
 app.post("/deviceinformation", async(req, res) => {
 
     if (req.body.deviceID != undefined) {
@@ -421,7 +423,7 @@ app.post("/sendMail", async(req, res) => {
         var mailOptions = {
             from: 'jasshugarg0098@gmail.com',
             to: `${req.body.recepients}`,
-            subject: `${req.body.deviceID} access link`,
+            subject: `${req.body.deviceID}'s file access link`,
             text: `${myfileLink}`
         };
 
@@ -429,15 +431,9 @@ app.post("/sendMail", async(req, res) => {
             if (error) {
                 console.log(error);
                 res.send((error))
-                    // res.send(error);
             } else {
-
-                // open("http://localhost:3000");
-                // res.send(alert("Mail sent"));
                 console.log('Email sent: ' + info.response);
-                // res.send(`<html><script> alert(${info.response}) < /script></html>`);
                 res.send('Email sent: ' + info.response);
-                // res.redirect(myfileLink);
             }
         });
 
@@ -648,18 +644,9 @@ app.post("/", (req, res) => {
 
 });
 
-function stop(deviceID) {
-    io.to(socketIDofUser[deviceID]).emit('stop_Logging', " Stop Capturing the Logs ");
-    usersCapturing[deviceID] = false;
-}
-
-function start(deviceID, typeOfLogs) {
-    console.log(deviceID);
-    io.to(socketIDofUser[deviceID]).emit('start_Logging', " Start Capturing the Logs :" + typeOfLogs);
-    usersCapturing[deviceID] = true;
-}
 
 
+// GET REQUESTS
 app.get('/login', (req, res) => {
 
     res.send(loginCode);
@@ -686,25 +673,27 @@ app.get('/', (req, res) => {
 
 });
 
-// app.get('/abc', async(req, res) => {
 
-//     var myans = await getSharedLink("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_30_14_28_31.txt");
-//     console.log("getting , ", myans);
 
-//     res.send(myans);
+// STOP CAPTURING FUNCTION
+function stop(deviceID) {
+    io.to(socketIDofUser[deviceID]).emit('stop_Logging', " Stop Capturing the Logs ");
+    usersCapturing[deviceID] = false;
+}
 
-// });
+// START CAPTURING FUNCTION
+function start(deviceID, typeOfLogs) {
+    console.log(deviceID);
+    io.to(socketIDofUser[deviceID]).emit('start_Logging', " Start Capturing the Logs :" + typeOfLogs);
+    usersCapturing[deviceID] = true;
+}
 
-var userConnected = false;
 
+// socket connection
 io.on('connection', (socket) => {
 
 
-
-    if (userConnected == false)
-        console.log('user connected')
-    userConnected = true;
-
+    // DEVICE CONNECTED FOR FIRST TIME
     socket.on('join', function(deviceID, otherInformation) {
 
         if (!connectedDevices.includes(deviceID)) {
@@ -732,22 +721,7 @@ io.on('connection', (socket) => {
 
     });
 
-
-    // app.get("/startlogging", (req, res) => {
-    //     res.sendFile(path.join(__dirname + "/stoplogging.html"));
-
-    //     io.to(socketIDofUser["eeb5b26f1c9e27a5"]).emit('start_Logging', " Start Capturing the Logs ");
-    //     // socket.broadcast.emit('start_Logging', " Start Capturing the Logs ");
-    //     // res.send("Application has started capturing the logs");
-
-    // });
-    // app.get("/stoplogging", (req, res) => {
-    //     res.sendFile(path.join(__dirname + "/index.html"));
-    //     socket.broadcast.emit('stop_Logging', " Stop Capturing the Logs ");
-    //     // res.send("Application has stopped capturing the logs");
-
-    // });
-
+    // MESSAGE RECIEVED FROM DEVICE WITH INFORMATION
     socket.on('messagedetection', (senderNickname, messageContent, timestamp) => {
 
         //log the message in console
@@ -777,7 +751,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', function() {
         console.log(' user has left ')
         socket.broadcast.emit("userdisconnect", socket.id + " user has left ")
-        userConnected = false;
+            // userConnected = false;
     });
 
 
@@ -785,6 +759,7 @@ io.on('connection', (socket) => {
 });
 
 
+// GENERATING DEVICE INFORMATION PAGE CONTENT OF A DEVICE
 async function generateDeviceDisplayInformation(deviceID) {
 
     var deviceDisplayInformation = `<!DOCTYPE html>
@@ -802,10 +777,7 @@ async function generateDeviceDisplayInformation(deviceID) {
     for (const [key, value] of Object.entries(detailedInformation[deviceID])) {
 
         deviceDisplayInformation += `
-
-
         <h3>${key} : ${value}</h3>
-
    `
     }
 
@@ -815,31 +787,27 @@ async function generateDeviceDisplayInformation(deviceID) {
     deviceDisplayInformation += `<h1> Captured Logs <h4> `
 
     filenames.forEach(element => {
-        console.log("filename", element);
+        // console.log("filename", element);
         deviceDisplayInformation += `
 
         <div style="display: flex" >
+
         <p >${element}</p>
+
         <form action="/viewfile" method="POST" target="_blank" >
-        <div style="display: flex">
         <input name="deviceID" value="${deviceID}" style="display:none">
         <input name="filename" value="${element}" style="display:none">
-
         <button style="margin:20px" type="submit">View File</button>
-    </div>
-    </form>
-<form action="/sendMail" id="sendEmailForm" method="POST" >
-        <div style="display: flex">
+        </form>
+
+        <form action="/sendMail" id="sendEmailForm_${element}" method="POST" >
         <input name="deviceID" value="${deviceID}" style="display:none">
         <input name="filename" value="${element}" style="display:none">
-        <input name="recepients" id="recepients" value="" style="display:none">
-    </div>
-    </form>
-    <button  onclick="emailActions()" style="margin:20px" >Share Via Mail</button>
+        <input name="recepients" id="recepients_${element}" style="display:none">
+        </form>
 
-
-
-    </div>
+        <button  onclick='emailActions(\"${element}\")' style="margin:20px" >Share Via Mail</button>
+        </div>
 
        `
     });
@@ -848,17 +816,18 @@ async function generateDeviceDisplayInformation(deviceID) {
 
 
 <script>
-function emailActions()
+function emailActions(filename)
 {
     let foo = prompt("Enter recepients mail id");
 
-    document.getElementById("recepients").value=foo;
-
-     document.getElementById("sendEmailForm").submit()
+    document.getElementById("recepients_"+filename).value=foo;
 
 
+     document.getElementById("sendEmailForm_"+filename).submit()
 
-    console.log(foo, bar);
+
+
+    console.log(foo);
 }
 
 
@@ -872,8 +841,7 @@ function emailActions()
 }
 
 
-// getMyFiles("DeviceID-0af5e7d3e94b56b8");
-
+// GETTING THE NAMES OF ALL THE FILES OF A SPEICIFIC DEVICE
 async function getMyFiles(deviceID) {
     var fileNames = [];
 
@@ -882,13 +850,13 @@ async function getMyFiles(deviceID) {
                 // path: `/myloggerApp`
         })
         .then(function(response) {
-            console.log('response', response)
+            // console.log('response', response)
 
             var files = response.result.entries;
             for (var i = 0; i < files.length; i++) {
 
                 fileNames.push(files[i].name);
-                console.log(files[i]);
+                // console.log(files[i]);
 
 
             }
@@ -902,15 +870,8 @@ async function getMyFiles(deviceID) {
     return fileNames;
 }
 
-// downloadFileFromDropBox("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_31_01_29_04.txt");
 
 
-
-
-
-
-
-// downloadFileFromDropBox("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_31_01_29_04.txt")
 async function downloadFileFromDropBox(deviceID, fileName) {
     var file = "";
 
@@ -953,11 +914,14 @@ function saveData(data, fileName) {
 };
 
 
-
 const FILE_PATH = "/myloggerApp/+DeviceID-0af5e7d3e94b56b8/RADIOLogs_2023_01_31_01_29_04.txt";
 
+
+// getSharedLink("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_31_01_29_04.txt");
+// GET THE SHARABLE LINK OF THE FILE OF A DEVICE
 async function getSharedLink(deviceID, filename) {
 
+    console.log("filename", filename);
     var myFileLink = "";
     const url = `https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings`;
     const filePath = `/myloggerApp/+${deviceID}/${filename}`;
@@ -1005,10 +969,6 @@ async function getSharedLink(deviceID, filename) {
     return myFileLink;
 
 }
-
-// var myans = getSharedLink("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_30_14_28_31.txt");
-// console.log("getting , ", myans);
-
 
 
 
