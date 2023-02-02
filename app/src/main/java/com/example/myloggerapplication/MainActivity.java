@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int EXTERNAL_STORAGE_PERMISSION_CODE = 10001;
     private static final int WRITE_EXTERNAL_STORAGE_PERMISSION_CODE = 10002;
     private static final int INTERNET_PERMISSION_CODE = 10003;
-    private static final String ACCESS_TOKEN = "sl.BX_HMFNkFd2R60THj1SoLIcV4FZm9xJBXdOpcWkiW_y8h2iMqVmBarTSIj03wYHtRT0A8PgHm7A-HVU20tndYDK2iXulv8PgRR3RvGlVrDjXgP7C8MnYabPjRFi3qwTyiM6X2nM";
+    private static final String ACCESS_TOKEN = "sl.BYAE0XUcMYkek-jQfpnpNkfQ_Cx53lYl_4ZZJsWyLWGVboXq3qK00ie7rfyZSrVIMz9amKXAhQXqQYI8nWsKRJhQ41Cku_vN_MxmZbC_XKVJZv6NRY577QiZSjGVMQhBGUg1GWa4";
     Boolean flag;
 
 
