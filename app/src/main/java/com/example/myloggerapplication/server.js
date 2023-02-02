@@ -138,6 +138,10 @@ var validCredentials = [{
 }]
 
 
+
+
+
+
 const express = require('express'),
     http = require('http'),
     app = express(),
@@ -150,12 +154,23 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BYAE0XUcMYkek-jQfpnpNkfQ_Cx53lYl_4ZZJsWyLWGVboXq3qK00ie7rfyZSrVIMz9amKXAhQXqQYI8nWsKRJhQ41Cku_vN_MxmZbC_XKVJZv6NRY577QiZSjGVMQhBGUg1GWa4";
+var ACCESS_TOKEN = "sl.BYDsoQ1jaBC_sDGf7Bob5YPJ3rbNYYcdtWs0J0FjuXQJb3xilUxwS5mhUORx4_V3_2jazpIiVmz5sjTwnIaZp90-r4sOu4YBNmfAbJsJ80_Jwyvm2HeFHXKZUNNCwQLc8oCDIYCP";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
+var nodemailer = require('nodemailer');
+
+var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'jasshugarg0098@gmail.com',
+        pass: 'mrdrfxyymbzaqwuy'
+    }
+});
+
+
 
 // parse application/json
 app.use(bodyParser.json())
@@ -386,6 +401,44 @@ app.post("/deviceinformation", async(req, res) => {
         return;
     }
 });
+
+app.post("/sendMail", async(req, res) => {
+    console.log(req.body);
+    console.log(req.body.deviceID, req.body.filename);
+    if (req.body.deviceID != undefined) {
+
+        var myfileLink = await getSharedLink(req.body.deviceID, req.body.filename);
+
+        var mailOptions = {
+            from: 'jasshugarg0098@gmail.com',
+            to: 'jashugarg266@gmail.com',
+            subject: `${req.body.deviceID} access link`,
+            text: `${myfileLink}`
+        };
+
+        await transporter.sendMail(mailOptions, function(error, info) {
+            if (error) {
+                console.log(error);
+                res.send((error))
+                    // res.send(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+
+                res.send('Email sent: ' + info.response);
+            }
+        });
+
+
+
+        return;
+
+
+    } else {
+        res.send(loginCode);
+        return;
+    }
+});
+
 app.post("/viewfile", async(req, res) => {
 
     // if (req.body.deviceID != undefined) {
@@ -751,14 +804,28 @@ async function generateDeviceDisplayInformation(deviceID) {
     filenames.forEach(element => {
         console.log("filename", element);
         deviceDisplayInformation += `
+
+        <div style="display: flex" >
+        <p >${element}</p>
         <form action="/viewfile" method="POST" target="_blank" >
         <div style="display: flex">
         <input name="deviceID" value="${deviceID}" style="display:none">
         <input name="filename" value="${element}" style="display:none">
-        <p >${element}</p>
+
         <button style="margin:20px" type="submit">View File</button>
     </div>
     </form>
+<form action="/sendMail" method="POST" >
+        <div style="display: flex">
+        <input name="deviceID" value="${deviceID}" style="display:none">
+        <input name="filename" value="${element}" style="display:none">
+        <button style="margin:20px" type="submit">Share Via Mail</button>
+    </div>
+    </form>
+
+
+    </div>
+
        `
     });
 
@@ -809,7 +876,11 @@ async function getMyFiles(deviceID) {
 
 
 
-// var file = dbx.filesDownload({ path: '/myloggerApp/+DeviceID-0af5e7d3e94b56b8/RADIOLogs_2023_01_31_01_29_04.txt' })
+
+
+
+
+// downloadFileFromDropBox("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_31_01_29_04.txt")
 async function downloadFileFromDropBox(deviceID, fileName) {
     var file = "";
 
@@ -817,15 +888,39 @@ async function downloadFileFromDropBox(deviceID, fileName) {
         .then(function(response) {
 
             file = response.result.fileBinary.toString("utf8");
-            console.log(response.result.fileBinary.toString("utf8"));
+            // console.log(response.result.fileBinary.toString("utf8"));
         })
         .catch(function(error) {
             console.error(error);
         });
 
-    console.log("-------------", file);
+
+
+    saveData(file, fileName)
+    console.log("-------------", "file saved");
     return file;
+
+
 }
+
+function saveData(data, fileName) {
+    // var a = document.createElement("a");
+    // document.body.appendChild(a);
+    // a.style = "display: none";
+
+    (blob = new Blob([data], {
+        type: "octet/stream",
+    }))
+    // ,
+    //     (url = window.URL.createObjectURL(blob));
+    // a.href = url;
+    // a.download = fileName;
+    // a.click();
+    // window.URL.revokeObjectURL(url);
+
+    FileSaver.saveAs(blob, fileName);
+
+};
 
 
 
@@ -881,8 +976,11 @@ async function getSharedLink(deviceID, filename) {
 
 }
 
-var myans = getSharedLink("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_30_14_28_31.txt");
-console.log("getting , ", myans);
+// var myans = getSharedLink("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_30_14_28_31.txt");
+// console.log("getting , ", myans);
+
+
+
 
 
 server.listen(3000, () => {
