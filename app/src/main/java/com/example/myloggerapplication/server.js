@@ -150,7 +150,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BYBh-OPTgfKbhoa3MGDhme7kokX4pZjCWs8UeIdwPHjMBdnLWxYm9nxjG36OwgSpgYYp_EeB6oG6KjyXGPOYRoWOyBV4yZKll4aRsv8UzTcTZbSkBAaJbCSUwaKyNB_Mt6_sVVPk";
+var ACCESS_TOKEN = "sl.BYAE0XUcMYkek-jQfpnpNkfQ_Cx53lYl_4ZZJsWyLWGVboXq3qK00ie7rfyZSrVIMz9amKXAhQXqQYI8nWsKRJhQ41Cku_vN_MxmZbC_XKVJZv6NRY577QiZSjGVMQhBGUg1GWa4";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -400,6 +400,11 @@ app.post("/viewfile", async(req, res) => {
     //     return;
     // }
 
+    var myans = await getSharedLink(req.body.deviceID, req.body.filename);
+    console.log("getting , ", myans);
+
+    res.redirect(myans);
+    return;
 
 
 
@@ -604,6 +609,7 @@ app.get('/logout', (req, res) => {
 
 app.get('/', (req, res) => {
 
+
     if (req.session.userName == undefined)
         res.send(loginCode);
     else {
@@ -613,6 +619,15 @@ app.get('/', (req, res) => {
 
 
 });
+
+// app.get('/abc', async(req, res) => {
+
+//     var myans = await getSharedLink("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_30_14_28_31.txt");
+//     console.log("getting , ", myans);
+
+//     res.send(myans);
+
+// });
 
 var userConnected = false;
 
@@ -736,7 +751,7 @@ async function generateDeviceDisplayInformation(deviceID) {
     filenames.forEach(element => {
         console.log("filename", element);
         deviceDisplayInformation += `
-        <form action="/viewfile" method="POST" >
+        <form action="/viewfile" method="POST" target="_blank" >
         <div style="display: flex">
         <input name="deviceID" value="${deviceID}" style="display:none">
         <input name="filename" value="${element}" style="display:none">
@@ -840,7 +855,7 @@ async function getSharedLink(deviceID, filename) {
 
 
         // console.log(`stdout: ${myJSONResponse['url']}`);
-        console.log(`stdout: ${myJSONResponse["url"]}`);
+        // console.log(`stdout: ${myJSONResponse["url"]}`);
 
         myFileLink = myJSONResponse["url"];
 
@@ -848,25 +863,26 @@ async function getSharedLink(deviceID, filename) {
             return myFileLink;
 
 
+
     });
+
 
     await dbx.sharingListSharedLinks({ path: filePath })
         .then(function(response) {
             console.log(response.result.links[0].url);
             myFileLink = response.result.links[0].url;
+            return myFileLink;
         })
         .catch(function(error) {
             console.error(error);
         });
 
-
     return myFileLink;
-
 
 }
 
-console.log(
-    getSharedLink("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_30_14_28_31.txt"));
+var myans = getSharedLink("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_30_14_28_31.txt");
+console.log("getting , ", myans);
 
 
 server.listen(3000, () => {
