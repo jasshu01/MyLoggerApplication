@@ -122,6 +122,7 @@ var head = `<!DOCTYPE html>
 
         </form>
 
+
 `;
 
 
@@ -154,7 +155,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BYDsoQ1jaBC_sDGf7Bob5YPJ3rbNYYcdtWs0J0FjuXQJb3xilUxwS5mhUORx4_V3_2jazpIiVmz5sjTwnIaZp90-r4sOu4YBNmfAbJsJ80_Jwyvm2HeFHXKZUNNCwQLc8oCDIYCP";
+var ACCESS_TOKEN = "sl.BYDCx4ygfJU5stkvHxr8zaxRiBTnIX2w47ftOaIKU0IdFverVO-biR_T--zoAgF8M9KT93jC71J_39-SWmQVLfbrcAEft-qwblW_EL9UCNBaGvNNKYhc5sk-GuYdAwz5yqHzy7_Y";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -252,8 +253,11 @@ function generateBody() {
         }
 
 
-
         body += `
+
+
+
+
         <div class="row">
         <div style="width: 30%;">
         <form action="/deviceinformation" method="POST">
@@ -316,6 +320,11 @@ function generateBody() {
 
 
 <script>
+
+
+
+
+
     document
         .getElementById("selectMultipleDevices")
         .addEventListener("click", (e) => {
@@ -411,7 +420,7 @@ app.post("/sendMail", async(req, res) => {
 
         var mailOptions = {
             from: 'jasshugarg0098@gmail.com',
-            to: 'jashugarg266@gmail.com',
+            to: `${req.body.recepients}`,
             subject: `${req.body.deviceID} access link`,
             text: `${myfileLink}`
         };
@@ -422,9 +431,13 @@ app.post("/sendMail", async(req, res) => {
                 res.send((error))
                     // res.send(error);
             } else {
-                console.log('Email sent: ' + info.response);
 
+                // open("http://localhost:3000");
+                // res.send(alert("Mail sent"));
+                console.log('Email sent: ' + info.response);
+                // res.send(`<html><script> alert(${info.response}) < /script></html>`);
                 res.send('Email sent: ' + info.response);
+                // res.redirect(myfileLink);
             }
         });
 
@@ -505,7 +518,7 @@ app.post("/viewfile", async(req, res) => {
                 fileName = "my-download.txt";
 
             // saveData(data, fileName);
-        </script>
+        </>
 
         </html>
             `
@@ -815,13 +828,15 @@ async function generateDeviceDisplayInformation(deviceID) {
         <button style="margin:20px" type="submit">View File</button>
     </div>
     </form>
-<form action="/sendMail" method="POST" >
+<form action="/sendMail" id="sendEmailForm" method="POST" >
         <div style="display: flex">
         <input name="deviceID" value="${deviceID}" style="display:none">
         <input name="filename" value="${element}" style="display:none">
-        <button style="margin:20px" type="submit">Share Via Mail</button>
+        <input name="recepients" id="recepients" value="" style="display:none">
     </div>
     </form>
+    <button  onclick="emailActions()" style="margin:20px" >Share Via Mail</button>
+
 
 
     </div>
@@ -832,7 +847,22 @@ async function generateDeviceDisplayInformation(deviceID) {
     deviceDisplayInformation += `
 
 
+<script>
+function emailActions()
+{
+    let foo = prompt("Enter recepients mail id");
 
+    document.getElementById("recepients").value=foo;
+
+     document.getElementById("sendEmailForm").submit()
+
+
+
+    console.log(foo, bar);
+}
+
+
+</script>
     </body>
 
     </html>`;
