@@ -149,7 +149,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BYCODKzMslcRKK-XbS4FcSsZcI0EYdm_LGQC3evN2__tsLr89H8JFcO-6twshGpe525eq1ZWDgC3_u0Ge0sLUNkHz4ESOe0aJvUp9QCqA-DgRkZNr_BrYpmcZ";
+var ACCESS_TOKEN = "sl.BYGuA2qJMWYkniFZ3xsQTM9y-1ZuOHX-ePLuFPb5E_hTl1882MSFatgRQcMFUgdujzY-9iwfyOZTRac6dOIPDP_65OCBD8qQwV82tUZG7uCKb14qfIPe6XCPkUWRPhCO_D85xzRz";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -423,8 +423,8 @@ app.post("/sendMail", async(req, res) => {
         var mailOptions = {
             from: 'jasshugarg0098@gmail.com',
             to: `${req.body.recepients}`,
-            subject: `${req.body.deviceID}'s file access link`,
-            text: `${myfileLink}`
+            subject: `Log file access link`,
+            text: ` ${req.body.deviceID} \n FileName-${req.body.filename} \n File Access Link-${myfileLink}`
         };
 
         await transporter.sendMail(mailOptions, function(error, info) {
