@@ -149,7 +149,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BYG9gNr0EVPE_b6pjUsSVxO-h-Wbo7Y8sZDieXfrIgv";
+var ACCESS_TOKEN = "sl.BYHFf1XWhcY8xFoQFp_NnA_hAIJVxgPtlaiYAZrmYTIKMxCu_k8MZda4tIZBkBgjmbLoaM-Wm6PRGXmhNg8g5AYmm06QAqL4WoQ0Wt-A8vZAIuxaiSoPzJcw0j";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -816,89 +816,176 @@ io.on('connection', (socket) => {
 });
 
 
+// (async function() {
+//     await generateDeviceDisplayInformation("DeviceID-0af5e7d3e94b56b8");
+//     console.log('test');
+// })();
+
+// generateDeviceDisplayInformation("DeviceID-0af5e7d3e94b56b8");
 // GENERATING DEVICE INFORMATION PAGE CONTENT OF A DEVICE
 async function generateDeviceDisplayInformation(deviceID) {
 
     var deviceDisplayInformation = `<!DOCTYPE html>
-    <html lang="en">
+        <html lang="en">
 
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
-    </head>  <body>
-    <h1> ${deviceID}</h1>
-    `
+        <head>
+            <meta charset="UTF-8" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Document</title>
+        </head>  <body>
+        <h1> ${deviceID}</h1>
+        `
 
     for (const [key, value] of Object.entries(detailedInformation[deviceID])) {
 
         deviceDisplayInformation += `
-        <h3>${key} : ${value}</h3>
-   `
+            <h3>${key} : ${value}</h3>
+       `
     }
+
 
     filenames = await getMyFiles(deviceID);
     console.log("filenames", filenames.length);
 
-    deviceDisplayInformation += `<h1> Captured Logs <h4> `
 
-    filenames.forEach(element => {
-        // console.log("filename", element);
-        deviceDisplayInformation += `
 
-        <div style="display: flex" >
+    deviceDisplayInformation += `<h1> Captured Logs </h1> `;
 
-        <p >${element}</p>
 
-        <form action="/viewfile" method="POST" target="_blank" >
-        <input name="deviceID" value="${deviceID}" style="display:none">
-        <input name="filename" value="${element}" style="display:none">
-        <button style="margin:20px" type="submit">View File</button>
-        </form>
-        <form action="/downloadFile" method="POST" >
-        <input name="deviceID" value="${deviceID}" style="display:none">
-        <input name="filename" value="${element}" style="display:none">
-        <button style="margin:20px" type="submit">Download File</button>
-        </form>
+    // await (filenames.forEach(async element => {
+    //     deviceDisplayInformation += await gatherInformation(deviceID, element);
 
-        <form action="/sendMail" id="sendEmailForm_${element}" method="POST" >
-        <input name="deviceID" value="${deviceID}" style="display:none">
-        <input name="filename" value="${element}" style="display:none">
-        <input name="recepients" id="recepients_${element}" style="display:none">
-        </form>
+    // }))
+
+
+    // await (async function() {
+    //     await (filenames.forEach(async element => {
+    //         deviceDisplayInformation += await gatherInformation(deviceID, element);
+    //     }))
 
 
 
-        <button  onclick='emailActions(\"${element}\")' style="margin:20px" >Share Via Mail</button>
+    //     console.log("done");
 
-        </div>
-
-       `
-    });
-
-    deviceDisplayInformation += `
+    //     deviceDisplayInformation += `
 
 
-<script>
-function emailActions(filename)
-{
-    let foo = prompt("Enter recepients mail id");
-    document.getElementById("recepients_"+filename).value=foo;
-     document.getElementById("sendEmailForm_"+filename).submit()
-    console.log(foo);
-}
+    // <script>
+    // function emailActions(filename)
+    // {
+    //     let foo = prompt("Enter recepients mail id");
+    //     document.getElementById("recepients_"+filename).value=foo;
+    //      document.getElementById("sendEmailForm_"+filename).submit()
+    //     console.log(foo);
+    // }
 
 
 
 
-</script>
-    </body>
+    // </script>
+    //     </body>
 
-    </html>`;
+    //     </html>`;
 
+    //     console.log("returning");
+    //     return deviceDisplayInformation;
+
+    // })();
+
+
+
+    // await filenames.forEach(async element => {
+    //     deviceDisplayInformation += await gatherInformation(deviceID, element);
+    // })
+
+
+    for (var itr = 0; itr < filenames.length; itr++) {
+        deviceDisplayInformation += await gatherInformation(deviceID, filenames[itr]);
+    }
+
+
+    await console.log("done");
+
+    deviceDisplayInformation += await `
+
+
+    <script>
+    function emailActions(filename)
+    {
+        let foo = prompt("Enter recepients mail id");
+        document.getElementById("recepients_"+filename).value=foo;
+         document.getElementById("sendEmailForm_"+filename).submit()
+        console.log(foo);
+    }
+
+
+
+
+    </script>
+        </body>
+
+        </html>`;
+
+    console.log("returning");
     return deviceDisplayInformation;
 
+
+
+
+
+
+}
+// forAllFiles("DeviceID-0af5e7d3e94b56b8");
+async function forAllFiles(deviceID) {
+    filenames = await getMyFiles(deviceID);
+    console.log("filenames", filenames.length);
+
+    var deviceDisplayInformationLogs = "";
+
+
+    console.log("deviceDisplayInformationLogs", deviceDisplayInformationLogs);
+    return deviceDisplayInformationLogs;
+}
+
+async function gatherInformation(deviceID, element) {
+
+    var count = await getANRCount(deviceID, element);
+    console.log("filename and count", element, count);
+
+    var html = `
+
+    <div style="display: flex" >
+
+    <p >${element}</p>
+
+    <form action="/viewfile" method="POST" target="_blank" >
+    <input name="deviceID" value="${deviceID}" style="display:none">
+    <input name="filename" value="${element}" style="display:none">
+    <button style="margin:20px" type="submit">View File</button>
+    </form>
+
+    <form action="/downloadFile" method="POST" >
+    <input name="deviceID" value="${deviceID}" style="display:none">
+    <input name="filename" value="${element}" style="display:none">
+    <button style="margin:20px" type="submit">Download File</button>
+    </form>
+
+    <form action="/sendMail" id="sendEmailForm_${element}" method="POST" >
+    <input name="deviceID" value="${deviceID}" style="display:none">
+    <input name="filename" value="${element}" style="display:none">
+    <input name="recepients" id="recepients_${element}" style="display:none">
+    </form>
+
+    <button  onclick='emailActions(\"${element}\")' style="margin:20px" >Share Via Mail</button>
+
+    <h2> ANRs Count ${count} </h2>
+
+    </div>
+
+   `
+        // console.log("html", html);
+    return html;
 }
 
 
@@ -940,12 +1027,13 @@ async function downloadFileFromDropBox(deviceID, fileName) {
         .then(function(response) {
 
             file = response.result.fileBinary.toString("utf8");
-            console.log(response.result.fileBinary.toString("utf8"));
-            console.log("returning");
+            // console.log(response.result.fileBinary.toString("utf8"));
+            // console.log("returning");
             return response.result.fileBinary.toString("utf8");
         })
         .catch(function(error) {
             console.error(error);
+            return "";
         });
 
     return file;
@@ -953,24 +1041,7 @@ async function downloadFileFromDropBox(deviceID, fileName) {
 
 }
 
-function saveData(data, fileName) {
-    // var a = document.createElement("a");
-    // document.body.appendChild(a);
-    // a.style = "display: none";
 
-    (blob = new Blob([data], {
-        type: "octet/stream",
-    }))
-    // ,
-    //     (url = window.URL.createObjectURL(blob));
-    // a.href = url;
-    // a.download = fileName;
-    // a.click();
-    // window.URL.revokeObjectURL(url);
-
-    FileSaver.saveAs(blob, fileName);
-
-};
 
 
 const FILE_PATH = "/myloggerApp/+DeviceID-0af5e7d3e94b56b8/RADIOLogs_2023_01_31_01_29_04.txt";
@@ -1029,6 +1100,29 @@ async function getSharedLink(deviceID, filename) {
 
 }
 
+
+// getANRCount("DeviceID-0af5e7d3e94b56b8");
+async function getANRCount(deviceID, filename) {
+
+    // var myfiles = await getMyFiles(deviceID);
+    // console.log(myfiles);
+    // myfiles.forEach(async filename => {
+    let data = await downloadFileFromDropBox(deviceID, filename);
+    var mylogs = data.split("\n");
+    var count = 0;
+    mylogs.forEach(currLog => {
+        if (currLog.includes("ANR in")) {
+            console.log(currLog);
+            count++;
+        }
+    });
+
+    // console.log(filename, count);
+    return count;
+
+    // });
+
+}
 
 
 
