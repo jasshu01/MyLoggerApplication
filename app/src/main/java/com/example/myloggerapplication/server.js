@@ -149,7 +149,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BYGuA2qJMWYkniFZ3xsQTM9y-1ZuOHX-ePLuFPb5E_hTl1882MSFatgRQcMFUgdujzY-9iwfyOZTRac6dOIPDP_65OCBD8qQwV82tUZG7uCKb14qfIPe6XCPkUWRPhCO_D85xzRz";
+var ACCESS_TOKEN = "sl.BYG9gNr0EVPE_b6pjUsSVxO-h-Wbo7Y8sZDieXfrIgv";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -402,6 +402,63 @@ function generateBody() {
 
 
 // POST REQUESTS
+
+app.post("/downloadFile", async(req, res) => {
+    console.log(req.body);
+    if (req.body.deviceID != undefined) {
+
+        console.log("about to fetch data");
+        var filedata = await downloadFileFromDropBox(req.body.deviceID, req.body.filename);
+        await console.log("fetched");
+        // await console.log(filedata);
+        // var downloadfileResponse = await ;
+        res.send(`<!DOCTYPE html>
+        <html lang="en">
+
+        <head>
+            <meta charset="UTF-8" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Document</title>
+        </head>
+
+        <body>
+        <p style="display:none" id="content">${filedata}</p>
+        </body>
+        <script>
+
+                var a = document.createElement("a");
+                document.body.appendChild(a);
+                a.style = "display: none";
+
+                save(document.getElementById(\"content\").innerHTML,\"${req.body.filename}\");
+
+                function save(data, fileName) {
+                    (blob = new Blob([data], {
+                        type: "octet/stream",
+                    })),
+                    (url = window.URL.createObjectURL(blob));
+                    a.href = url;
+                    a.download = fileName;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    history.back();
+                };
+
+
+        </script>
+
+        </html>`);
+        return;
+
+
+
+
+    } else {
+        res.send(loginCode);
+        return;
+    }
+});
 app.post("/deviceinformation", async(req, res) => {
 
     if (req.body.deviceID != undefined) {
@@ -799,6 +856,11 @@ async function generateDeviceDisplayInformation(deviceID) {
         <input name="filename" value="${element}" style="display:none">
         <button style="margin:20px" type="submit">View File</button>
         </form>
+        <form action="/downloadFile" method="POST" >
+        <input name="deviceID" value="${deviceID}" style="display:none">
+        <input name="filename" value="${element}" style="display:none">
+        <button style="margin:20px" type="submit">Download File</button>
+        </form>
 
         <form action="/sendMail" id="sendEmailForm_${element}" method="POST" >
         <input name="deviceID" value="${deviceID}" style="display:none">
@@ -806,7 +868,10 @@ async function generateDeviceDisplayInformation(deviceID) {
         <input name="recepients" id="recepients_${element}" style="display:none">
         </form>
 
+
+
         <button  onclick='emailActions(\"${element}\")' style="margin:20px" >Share Via Mail</button>
+
         </div>
 
        `
@@ -819,16 +884,12 @@ async function generateDeviceDisplayInformation(deviceID) {
 function emailActions(filename)
 {
     let foo = prompt("Enter recepients mail id");
-
     document.getElementById("recepients_"+filename).value=foo;
-
-
      document.getElementById("sendEmailForm_"+filename).submit()
-
-
-
     console.log(foo);
 }
+
+
 
 
 </script>
@@ -871,24 +932,22 @@ async function getMyFiles(deviceID) {
 }
 
 
-
+// downloadFileFromDropBox("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_01_30_14_04_06.txt");
 async function downloadFileFromDropBox(deviceID, fileName) {
     var file = "";
 
-    dbx.filesDownload({ path: `/myloggerApp/+${deviceID}/${fileName}` })
+    await dbx.filesDownload({ path: `/myloggerApp/+${deviceID}/${fileName}` })
         .then(function(response) {
 
             file = response.result.fileBinary.toString("utf8");
-            // console.log(response.result.fileBinary.toString("utf8"));
+            console.log(response.result.fileBinary.toString("utf8"));
+            console.log("returning");
+            return response.result.fileBinary.toString("utf8");
         })
         .catch(function(error) {
             console.error(error);
         });
 
-
-
-    saveData(file, fileName)
-    console.log("-------------", "file saved");
     return file;
 
 
