@@ -149,7 +149,7 @@ var bodyParser = require('body-parser');
 const { time } = require('console');
 var session = require('express-session')
 const { Dropbox } = require('dropbox'); // eslint-disable-line import/no-unresolved
-var ACCESS_TOKEN = "sl.BYHFf1XWhcY8xFoQFp_NnA_hAIJVxgPtlaiYAZrmYTIKMxCu_k8MZda4tIZBkBgjmbLoaM-Wm6PRGXmhNg8g5AYmm06QAqL4WoQ0Wt-A8vZAIuxaiSoPzJcw0j";
+var ACCESS_TOKEN = "sl.BYSbtffBtwoxnbfdDoZ76HsbUXSkC0GA1cbgUepFUsOZsfdpDw3qw5k2gdZa8oFc6bO7U54CMQv_xI2R1-JpsZ";
 var dbx = new Dropbox({ accessToken: ACCESS_TOKEN });
 const FileSaver = require("file-saver");
 
@@ -209,6 +209,7 @@ function extractOtherInformation(deviceID, otherInformation) {
 
 // DATABASE CONNECTION
 var mongoose = require("mongoose");
+const e = require('express');
 var DB = `mongodb+srv://jasshugarg:Yashu1801@pizzaclub.4rjeu.mongodb.net/PizzaClub?retryWrites=true&w=majority`;
 // mongoose.set('strictQuery', true)
 mongoose.connect(DB, {
@@ -837,72 +838,32 @@ async function generateDeviceDisplayInformation(deviceID) {
         <h1> ${deviceID}</h1>
         `
 
-    for (const [key, value] of Object.entries(detailedInformation[deviceID])) {
+    // for (const [key, value] of Object.entries(detailedInformation[deviceID])) {
 
-        deviceDisplayInformation += `
-            <h3>${key} : ${value}</h3>
-       `
-    }
+    //     deviceDisplayInformation += `
+    //         <h3>${key} : ${value}</h3>
+    //    `
+    // }
 
 
     filenames = await getMyFiles(deviceID);
     console.log("filenames", filenames.length);
 
 
+    // deviceDisplayInformation += `<h1> Slow Operations </h1> `;
+    for (var itr = 35; itr < filenames.length; itr++) {
+        deviceDisplayInformation += await gatherInformation(deviceID, filenames[itr], "Slow operation");
+    }
 
-    deviceDisplayInformation += `<h1> Captured Logs </h1> `;
-
-
-    // await (filenames.forEach(async element => {
-    //     deviceDisplayInformation += await gatherInformation(deviceID, element);
-
-    // }))
-
-
-    // await (async function() {
-    //     await (filenames.forEach(async element => {
-    //         deviceDisplayInformation += await gatherInformation(deviceID, element);
-    //     }))
-
-
-
-    //     console.log("done");
-
-    //     deviceDisplayInformation += `
-
-
-    // <script>
-    // function emailActions(filename)
-    // {
-    //     let foo = prompt("Enter recepients mail id");
-    //     document.getElementById("recepients_"+filename).value=foo;
-    //      document.getElementById("sendEmailForm_"+filename).submit()
-    //     console.log(foo);
+    // deviceDisplayInformation += `<h1>Doing too much work on its main thread</h1> `;
+    // for (var itr = 35; itr < filenames.length; itr++) {
+    //     deviceDisplayInformation += await gatherInformation(deviceID, filenames[itr], "doing too much work on its main thread");
     // }
 
-
-
-
-    // </script>
-    //     </body>
-
-    //     </html>`;
-
-    //     console.log("returning");
-    //     return deviceDisplayInformation;
-
-    // })();
-
-
-
-    // await filenames.forEach(async element => {
-    //     deviceDisplayInformation += await gatherInformation(deviceID, element);
-    // })
-
-
-    for (var itr = 0; itr < filenames.length; itr++) {
-        deviceDisplayInformation += await gatherInformation(deviceID, filenames[itr]);
-    }
+    // deviceDisplayInformation += `<h1> Captured Logs </h1> `;
+    // for (var itr = 0; itr < filenames.length; itr++) {
+    //     deviceDisplayInformation += await gatherInformationForAll(deviceID, filenames[itr]);
+    // }
 
 
     await console.log("done");
@@ -948,11 +909,58 @@ async function forAllFiles(deviceID) {
     return deviceDisplayInformationLogs;
 }
 
-async function gatherInformation(deviceID, element) {
 
-    var count = await getANRCount(deviceID, element);
-    console.log("filename and count", element, count);
 
+
+async function gatherInformation(deviceID, element, filter) {
+
+
+
+    var result = await getANRCount(deviceID, element, filter);
+    console.log(element, filter, result);
+    if (result[0] == false)
+        return "";
+
+    var html = ``;
+    for (var itr = 0; itr < result.length; itr++) {
+        html += `
+
+        <div style="display: flex" >
+
+        <p style="width:1000px">${result[itr]}</p>
+
+        <form action="/viewfile" method="POST" target="_blank" >
+        <input name="deviceID" value="${deviceID}" style="display:none">
+        <input name="filename" value="${element}" style="display:none">
+        <button style="margin:20px" type="submit">View File</button>
+        </form>
+
+        <form action="/downloadFile" method="POST" >
+        <input name="deviceID" value="${deviceID}" style="display:none">
+        <input name="filename" value="${element}" style="display:none">
+        <button style="margin:20px" type="submit">Download File</button>
+        </form>
+
+        <form action="/sendMail" id="sendEmailForm_${element}" method="POST" >
+        <input name="deviceID" value="${deviceID}" style="display:none">
+        <input name="filename" value="${element}" style="display:none">
+        <input name="recepients" id="recepients_${element}" style="display:none">
+        </form>
+
+        <button  onclick='emailActions(\"${element}\")' style="margin:20px" >Share Via Mail</button>
+
+        </div>
+
+       `
+    }
+
+
+    // console.log("html", html);
+    return html;
+}
+
+async function gatherInformationForAll(deviceID, element) {
+    console.log(element);
     var html = `
 
     <div style="display: flex" >
@@ -979,7 +987,7 @@ async function gatherInformation(deviceID, element) {
 
     <button  onclick='emailActions(\"${element}\")' style="margin:20px" >Share Via Mail</button>
 
-    <h2> ANRs Count ${count} </h2>
+
 
     </div>
 
@@ -1101,26 +1109,77 @@ async function getSharedLink(deviceID, filename) {
 }
 
 
-// getANRCount("DeviceID-0af5e7d3e94b56b8");
-async function getANRCount(deviceID, filename) {
-
-    // var myfiles = await getMyFiles(deviceID);
-    // console.log(myfiles);
-    // myfiles.forEach(async filename => {
+// getANRCount("DeviceID-0af5e7d3e94b56b8", "RADIOLogs_2023_02_06_09_44_51.txt", "Slow");
+async function getANRCount(deviceID, filename, filter) {
     let data = await downloadFileFromDropBox(deviceID, filename);
     var mylogs = data.split("\n");
-    var count = 0;
+    // var count = 0;
+
+    var response = [];
+
+    // if (await data.includes(filter))
+    // return true;
+    // return false;
+
     mylogs.forEach(currLog => {
-        if (currLog.includes("ANR in")) {
-            console.log(currLog);
-            count++;
+
+        currLog = currLog.substring(32);
+
+        if (currLog.toLowerCase().includes(("ANR in").toLowerCase())) {
+            response.push(currLog.split("}")[0]);
+        }
+        if (currLog.toLowerCase().includes(("Slow operation").toLowerCase())) {
+            response.push(currLog.split("}")[0]);
+        }
+        if (currLog.toLowerCase().includes(("exception").toLowerCase())) {
+            response.push(currLog.split("}")[0]);
+        }
+        if (currLog.toLowerCase().includes("doing too much work on its main thread")) {
+            response.push(currLog.split("}")[0]);
+        }
+        if (currLog.toLowerCase().includes("wtf")) {
+            response.push(currLog.split("}")[0]);
         }
     });
 
-    // console.log(filename, count);
-    return count;
 
+    if (response.length == 0) {
+        response.push(false);
+        return response;
+    }
+    return response;
+
+    // response += `ANRs ${count}`;
+    // mylogs.forEach(currLog => {
+    //     if (currLog.includes(filter)) {
+    //         return true;
+    //         console.log(currLog);
+    //         count++;
+    //     }
     // });
+    // return false;
+    // if (count > 0)
+    //     response += `Slow operation : ${count},\n`;
+    // count = 0;
+    // mylogs.forEach(currLog => {
+    //     if (currLog.includes("doing too much work on its main thread")) {
+    //         console.log(currLog);
+    //         count++;
+    //     }
+    // });
+
+    // if (count > 0)
+    //     response += ` Too much load on main thread : ${count}`;
+
+
+    // console.log(response);
+
+
+
+    // return response;
+    // return count;
+
+
 
 }
 

@@ -104,7 +104,7 @@ public class MyBootCompletedReceiver extends BroadcastReceiver {
 
 
             try {
-                socket = IO.socket("http://192.168.1.11:3000");
+                socket = IO.socket("http://192.168.1.8:3000");
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
